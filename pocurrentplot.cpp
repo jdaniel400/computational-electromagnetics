@@ -80,6 +80,7 @@ void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, int 
     	int nodeC = triangles(i,3);
     	for (int j = 0; j < 3; j++)
     		pts_A (i, j) = nodes (nodeA, j);
+
     	for (int j = 0; j < 3; j++)
     		pts_B (i, j) = nodes (nodeB, j);
     	for (int j = 0; j < 3; j++)
@@ -100,6 +101,7 @@ void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, int 
 	normals.normalize();
 
 }
+
 Matrix::Matrix (const int num_rows, const int num_columns)
 {
 	matrix = new double*[num_columns];
@@ -114,6 +116,7 @@ Matrix::Matrix (const int num_rows, const int num_columns)
 
 
 Matrix * build_nodes (int num_columns, int start_of_node_field, int start_of_triangle_field)
+
 {
 	ifstream mesh;
 	mesh.open("shape.txt");
@@ -134,6 +137,7 @@ Matrix * build_nodes (int num_columns, int start_of_node_field, int start_of_tri
 		}
 		mesh.getline(buf, MAX_CHARS_PER_LINE); //later getline
 		(*tmp)(r, c) = atof(buf);
+
 		c += 1;
 		vals_taken = vals_taken + 1;
 		i += 1;
@@ -154,6 +158,7 @@ Matrix * build_triangles (int num_columns, int start_of_triangle_field, int end_
 	char buf [MAX_CHARS_PER_LINE];
 	for (int idx = 0; idx < start_of_triangle_field + 6; idx++)
 		mesh.getline(buf, MAX_CHARS_PER_LINE);
+
 	int prealloc_length = (end_of_triangle_field  - (start_of_triangle_field + 6))/9 + 1;
 	Matrix *tmp = new Matrix ((prealloc_length), num_columns);
 	int i = start_of_triangle_field + 6; // start i at 7
@@ -174,6 +179,7 @@ Matrix * build_triangles (int num_columns, int start_of_triangle_field, int end_
  	   c += 1;
  	   vals_taken = vals_taken + 1;
  	   i += 1;
+
  	   if (vals_taken == 3)
  	   {
     	   i += 6; 
@@ -183,30 +189,45 @@ Matrix * build_triangles (int num_columns, int start_of_triangle_field, int end_
 	return tmp;
 }
 
-char * getNewSubstring (char * charArray, int start_index_inclusive, int end_index_exclusive)
+void getNewSubstring (char *& result, char * charArray, int start_index_inclusive, int end_index_exclusive)
 {
-	char * newString = new char [(end_index_exclusive - 1) - start_index_inclusive];
+	
+/*	char * newString = new char [(end_index_exclusive - 1) - start_index_inclusive];
 	for (int x = 0; x < end_index_exclusive; x++)
 		newString[x] = charArray[x];
-	return newString;
+	result = newString;
+	//return newString;
+*/	if (start_index_inclusive == end_index_exclusive) {
+		cout << "tried to print a substring of size zero at line " << charArray << " but only wanted: '" << charArray[start_index_inclusive] << "'" << endl;
+		return;
+	}
+	if (result != NULL)
+		delete[] result;	
+	result = new char [end_index_exclusive - start_index_inclusive];
+	for (int x = start_index_inclusive; x < end_index_exclusive; x++)
+		result[x - start_index_inclusive] = charArray[x];
+	//result = newString;
+	//return newString;
 }
+
 int main ()
 {
 	ifstream mesh;
 	mesh.open("shape.txt");
-	int start_of_node_field, start_of_triangle_field, end_of_triangle_field;
-	int line_count = 0;
+	int start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
+	int line_count = 0; //self explanatory, used in parsing file
 	char *current_line = new char [MAX_CHARS_PER_LINE](); //the () is absolutely necessary to intialize the string to white space. Otherwise will be leftover values.
 	int prev, cur;
-	double current [50000];
+	double current [50000]; //size of current is arbitrary
 	bool SUBSTRING_EXISTS = false;
 	int idx_for_current = 0;
 	bool delete_this_flag;
 
-/*
-	for (int i = 0; i < 8000; i++)
+
+	for (int i = 0; i < 80; i++)
 		mesh.getline(current_line, MAX_CHARS_PER_LINE);
-*/
+
+	char * temp_ch_ar = NULL; //move later
 
 	while (mesh.getline(current_line, MAX_CHARS_PER_LINE)) 
 	{
@@ -225,9 +246,8 @@ int main ()
 				SUBSTRING_EXISTS = true; //flag true so that we can grab a substring next time a space comes up
 			
 			if ((current_line[i] == ' ' || current_line[i] == '\r' || current_line[i] == '\0') && SUBSTRING_EXISTS) {
-				char *temp_ch_ar = getNewSubstring(current_line, start_idx, i);
-				double tmp = atof(getNewSubstring(current_line, start_idx, i));
-				delete temp_ch_ar;
+				getNewSubstring(temp_ch_ar, current_line, start_idx, i);
+				double tmp = atof(temp_ch_ar);//getNewSubstring(current_line, start_idx, i));
 				if (!(current_line[start_idx] == '0' && i == start_idx + 1) && tmp == 0) //basically check if atof returned 0 for an array other than '0'. This means it was an invalid number
 						current[idx_for_current++] = -9876543210;
 				else
@@ -241,18 +261,18 @@ int main ()
 				start_idx = i + 1;
 		}
 
-	/*	
-		if (line_count == 2000) {
-			for (int i = 0; i < 2000; i++)
-				cout << "double " << i << " is: " << current[i] << endl;
-		}
-*/
+		
 		line_count++;
-		delete current_line;
+		//delete current_line;
 		current_line = new char [MAX_CHARS_PER_LINE](); //must initialize, get rid of whatever is before
 
 	}
-	cout << " SALL GOOD MAN" << endl;
+	//	if (line_count == 2000) {
+			for (int i = 0; i < 200; i++)
+				cout << "double " << i << " is: " << current[i] << endl;
+	//	}
+	cout << " TEST" << endl;
+	return 0;
 	for (int i = 0; i < 50000; i++)
 	{
 		if (current[i] == 2411 && prev == -1)
