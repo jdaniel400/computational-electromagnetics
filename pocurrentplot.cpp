@@ -24,6 +24,7 @@ public:
 
 private:
 	double ** matrix;
+	int number_of_rows;
 };
 
 /*const double& Matrix::operator()(int row, int col) const
@@ -40,18 +41,19 @@ double& Matrix::operator()(int row, int col) const
 
 int Matrix::getLength()
 {
-	cout << "size is " << sizeof(matrix)/sizeof(matrix[0]);
-	return sizeof(matrix)/sizeof(matrix[0]);
+	cout << "size is " << number_of_rows << endl; // sizeof(matrix)/sizeof(matrix[0]);
+	return number_of_rows; //sizeof(matrix)/sizeof(matrix[0]);
 }
 
 Matrix & Matrix::cross (Matrix & arg_vect)
 {
 	Matrix *result = new Matrix (getLength(), 3);
+	//This is the formula for cross product, implemented iteratively for each row of the matrices
 	for (int i = 0; i < getLength(); i++)
 	{
-		(*result)(i,1) = matrix[i][2] * arg_vect(i,3) - matrix[i][3] * arg_vect(i,2);
-		(*result)(i,2) = matrix[i][3] * arg_vect(i,1) - matrix[i][1] * arg_vect(i,3);
-		(*result)(i,3) = matrix[i][1] * arg_vect(i,2) - matrix[i][2] * arg_vect(i,1);
+		(*result)(i,0) = matrix[i][1] * arg_vect(i,2) - matrix[i][2] * arg_vect(i,1);
+		(*result)(i,1) = matrix[i][2] * arg_vect(i,0) - matrix[i][0] * arg_vect(i,2);
+		(*result)(i,2) = matrix[i][0] * arg_vect(i,1) - matrix[i][1] * arg_vect(i,0);
 	}
 	return *result;
 }
@@ -60,10 +62,10 @@ void Matrix::normalize ()
 {
 	for (int i = 0; i < getLength(); i++)
 	{
-		double length = sqrt(matrix[i][1] * matrix[i][1] + matrix[i][2] * matrix[i][2] + matrix[i][3] * matrix[i][3]);	
+		double length = sqrt(matrix[i][0] * matrix[i][0] + matrix[i][1] * matrix[i][1] + matrix[i][2] * matrix[i][2]);	
+		matrix[i][0] = matrix[i][0] / length;
 		matrix[i][1] = matrix[i][1] / length;
 		matrix[i][2] = matrix[i][2] / length;
-		matrix[i][3] = matrix[i][3] / length;
 	}
 
 }
@@ -76,25 +78,25 @@ void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, int 
 	Matrix vect2 = *new Matrix (num_triangles, 3);
 
 	for (int i = 0; i < num_triangles; i++) {
-		int nodeA = triangles(i,1);
-   		int nodeB = triangles(i,2);
-    	int nodeC = triangles(i,3);
-    	for (int j = 0; j < 3; j++)
-    		pts_A (i, j) = nodes (nodeA, j);
+		int nodeA = triangles(i,0);
+   		int nodeB = triangles(i,1);
+    		int nodeC = triangles(i,2);
+  	  	for (int j = 0; j < 3; j++)
+    			pts_A (i, j) = nodes (nodeA, j);
 
-    	for (int j = 0; j < 3; j++)
-    		pts_B (i, j) = nodes (nodeB, j);
-    	for (int j = 0; j < 3; j++)
-    		pts_C (i, j) = nodes (nodeC, j);
-    	for (int j = 0; j < 3; j++)
-    		vect1(i, j) = nodes(nodeA, j) - nodes(nodeB, j);
-    	for (int j = 0; j < 3; j++)
-    		vect2(i, 1) = nodes(nodeA, j) - nodes(nodeC, j);
+ 	   	for (int j = 0; j < 3; j++)
+    			pts_B (i, j) = nodes (nodeB, j);
+    		for (int j = 0; j < 3; j++)
+    			pts_C (i, j) = nodes (nodeC, j);
+    		for (int j = 0; j < 3; j++)
+    			vect1(i, j) = nodes(nodeA, j) - nodes(nodeB, j);
+    		for (int j = 0; j < 3; j++)
+    			vect2(i, 1) = nodes(nodeA, j) - nodes(nodeC, j);
 	
 
+		centroids (i, 0) = (pts_A(i, 0) + pts_B(i, 0) + pts_C(i, 0)) / 3;
 		centroids (i, 1) = (pts_A(i, 1) + pts_B(i, 1) + pts_C(i, 1)) / 3;
 		centroids (i, 2) = (pts_A(i, 2) + pts_B(i, 2) + pts_C(i, 2)) / 3;
-		centroids (i, 3) = (pts_A(i, 3) + pts_B(i, 3) + pts_C(i, 3)) / 3;
 	
 	}
 
@@ -113,6 +115,7 @@ Matrix::Matrix (const int num_rows, const int num_columns)
 	for (int j = 0; j < num_columns; j++)
 		for (int i = 0; i < num_rows; i++)
 			matrix[j][i] = 0; //implemented this just because original MATLAB code called for zeros.
+	number_of_rows = num_rows;
 }
 
 
@@ -243,8 +246,8 @@ int main ()
 
 	}
 	//	if (line_count == 2000) {
-			for (int i = 67300; i < 67395; i++)
-				cout << "double " << i << " is: " << current[i] << endl;
+			//for (int i = 67300; i < 67395; i++)
+		//		cout << "double " << i << " is: " << current[i] << endl;
 	
 
 	
@@ -272,6 +275,14 @@ int main ()
 	Matrix *normals = new Matrix (nodes->getLength(), 3);
 	Matrix *centroids = new Matrix (nodes->getLength(), 3);
 	calculate_Centroids_and_Normals (*centroids, *normals, triangles->getLength(), *nodes, *triangles);
+	
+	for (int i = 0; i < nodes->getLength(); i++)
+		cout << (*normals) (i, 0) << " " << (*normals) (i, 1) << " " << (*normals) (i, 2) << endl;
+	
+	for (int i = 0; i < nodes->getLength(); i++)
+		cout << (*centroids)(i, 0) << " " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
+
+	
 	mesh.close();
 	return 0;
 }
