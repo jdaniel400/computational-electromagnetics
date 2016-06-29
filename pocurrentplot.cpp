@@ -34,7 +34,8 @@ private:
 
 double& Matrix::operator()(int row, int col) const
 {
-	return matrix[row][col]; //will return reference to cell entry, but can be modified
+	//note that it is ROW (Y) and then COL (X). MATLAB CONVENTION FORMAT
+	return matrix[col][row]; //will return reference to cell entry, but can be modified
 }
 
 int Matrix::getLength()
@@ -106,25 +107,25 @@ Matrix::Matrix (const int num_rows, const int num_columns)
 {
 	matrix = new double*[num_columns];
 
-	for (int i = 0; i < num_rows; i++)
+	for (int i = 0; i < num_columns; i++)
 		matrix[i] = new double [num_rows];
 
-	for (int j = 0; j < num_rows; j++)
-		for (int i = 0; i < num_columns; i++)
-			matrix[i][j] = 0; //implemented this just because original MATLAB code called for zeros
+	for (int j = 0; j < num_columns; j++)
+		for (int i = 0; i < num_rows; i++)
+			matrix[j][i] = 0; //implemented this just because original MATLAB code called for zeros.
 }
 
 
 Matrix * build_nodes (double * data, int start_of_node_field, int start_of_triangle_field)
 
 {
-	int prealloc_length = ((start_of_triangle_field - 2 - start_of_node_field) / 7) + 1; // added + 1 because originally MATLAB called for ceil
+	int prealloc_length = ((start_of_triangle_field - 3 - start_of_node_field) / 7) + 1; // added + 1 because originally MATLAB called for ceil
 	Matrix *tmp = new Matrix (prealloc_length, 3);
 	int i = start_of_node_field; // start i at 7
 	int vals_taken = 0;
 	int c = 0;
 	int r = 0;
-	while (i < start_of_triangle_field - 2)
+	while (i < start_of_triangle_field - 3) //if we opt for + 6 in main, this should change to - 8
 	{ 
 		if (c == 3) {
 			c = 0;
@@ -132,6 +133,7 @@ Matrix * build_nodes (double * data, int start_of_node_field, int start_of_trian
 			i += 4; //skip ahead by 4, taken 3 coordinates.next 4 entires are irrelevant. Note that i is already pointing to an irrelevant entry, that's why it is 4 and not 5
 		}
 		(*tmp)(r, c) = data[i];
+		//cout << "row " << r << " column " << c << "entry " << data[i] << endl;
 		c ++;
 		i ++;
 	}
@@ -139,18 +141,12 @@ Matrix * build_nodes (double * data, int start_of_node_field, int start_of_trian
 }
 
 
-Matrix * build_triangles (int num_columns, int start_of_triangle_field, int end_of_triangle_field)
+Matrix * build_triangles (double * data, int start_of_triangle_field, int end_of_triangle_field)
 {
-	//BE CAREFUL WITH THE 0 1 C++ MATLAB ARRAY START INDEX MISMATCH
-	ifstream mesh;
-	mesh.open("shape.txt");
-	char buf [MAX_CHARS_PER_LINE];
-	for (int idx = 0; idx < start_of_triangle_field + 6; idx++)
-		mesh.getline(buf, MAX_CHARS_PER_LINE);
-
+	//NOTE: Start of the triangle field has been designated as the first node number (with the code + 1) as of 6-29-16
 	int prealloc_length = (end_of_triangle_field  - (start_of_triangle_field + 6))/9 + 1;
-	Matrix *tmp = new Matrix ((prealloc_length), num_columns);
-	int i = start_of_triangle_field + 6; // start i at 7
+	Matrix *tmp = new Matrix ((prealloc_length), 3);
+	int i = start_of_triangle_field + 6; //begin at the first node (this is dependent on the parsing process)
 	int vals_taken = 0;
 	int c = 0;
 	int r = 0;
@@ -158,23 +154,16 @@ Matrix * build_triangles (int num_columns, int start_of_triangle_field, int end_
 	{
   		if (c == 3)
   		{
- 	    	c = 0;
- 	    	r = r + 1;
+ 	    		c = 0;
+ 	    		r++;
+			i += 6;
  		}
-    
-		mesh.getline(buf, MAX_CHARS_PER_LINE); //later getline
-		(*tmp)(r, c) = atof(buf);
+		(*tmp)(r, c) = data[i];
+		//cout << "row " << r << " column " << c << "entry " << data[i] << endl;
+ 	   	c ++;
+ 	   	i ++;
 
- 	   c += 1;
- 	   vals_taken = vals_taken + 1;
- 	   i += 1;
-
- 	   if (vals_taken == 3)
- 	   {
-    	   i += 6; 
-    	   vals_taken = 0; 	
-       }
-	}
+       }	
 	return tmp;
 }
 
@@ -192,9 +181,10 @@ void getNewSubstring (char *& result, char * charArray, int start_index_inclusiv
 	}
 	if (result != NULL)
 		delete[] result;	
-	result = new char [end_index_exclusive - start_index_inclusive];
+	result = new char [end_index_exclusive - start_index_inclusive + 1]; //+ 1 for null terminating char
 	for (int x = start_index_inclusive; x < end_index_exclusive; x++)
 		result[x - start_index_inclusive] = charArray[x];
+	result[end_index_exclusive - start_index_inclusive] = '\0'; 
 	//result = newString;
 	//return newString;
 }
@@ -212,7 +202,7 @@ int main ()
 	int idx_for_current = 0;
 
 
-	for (int i = 0; i < 80; i++)
+	for (int i = 0; i < 185; i++)
 		mesh.getline(current_line, MAX_CHARS_PER_LINE); // grab a few redundant characters. This isn't really necessary
 
 	char * temp_ch_ar = NULL; //character array that holds the result of the number substring of a current line (eg "12e-3")
@@ -253,10 +243,10 @@ int main ()
 
 	}
 	//	if (line_count == 2000) {
-			for (int i = 258; i < 440; i++)
+			for (int i = 67300; i < 67395; i++)
 				cout << "double " << i << " is: " << current[i] << endl;
-	//	}
-	cout << " TEST" << endl;
+	
+
 	
 
 	prev = current[0]; //prev variable used in detecting start field markers, initialize to first element
@@ -265,7 +255,7 @@ int main ()
 		if (current[i] == 2411 && prev == -1)
 			start_of_node_field = i + 5;
 		if (current[i] == 2412 && prev == -1)
-			start_of_triangle_field = i + 1; 
+			start_of_triangle_field = i + 1; // + 6 ?????? for the bottom 3 it should be + 6
 		if (current[i] == 2420 && prev == -1)
 			end_of_triangle_field = i - 2;
 
@@ -276,12 +266,13 @@ int main ()
 	cout << "end of triangle field " << current[end_of_triangle_field] << "(" << end_of_triangle_field << ")" << endl;
 	
 	
-	return 0;
+	
 	Matrix *nodes = build_nodes (current, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
-	Matrix *triangles = build_triangles (3,start_of_triangle_field, end_of_triangle_field);
+	Matrix *triangles = build_triangles (current, start_of_triangle_field, end_of_triangle_field);
 	Matrix *normals = new Matrix (nodes->getLength(), 3);
 	Matrix *centroids = new Matrix (nodes->getLength(), 3);
 	calculate_Centroids_and_Normals (*centroids, *normals, triangles->getLength(), *nodes, *triangles);
 	mesh.close();
+	return 0;
 }
 
