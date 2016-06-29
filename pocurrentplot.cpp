@@ -115,16 +115,11 @@ Matrix::Matrix (const int num_rows, const int num_columns)
 }
 
 
-Matrix * build_nodes (int num_columns, int start_of_node_field, int start_of_triangle_field)
+Matrix * build_nodes (double * data, int start_of_node_field, int start_of_triangle_field)
 
 {
-	ifstream mesh;
-	mesh.open("shape.txt");
-	char buf [MAX_CHARS_PER_LINE];
-	for (int idx = 0; idx < start_of_node_field; idx++)
-		mesh.getline(buf, MAX_CHARS_PER_LINE); //don't need to go anywhere
 	int prealloc_length = ((start_of_triangle_field - 2 - start_of_node_field) / 7) + 1; // added + 1 because originally MATLAB called for ceil
-	Matrix *tmp = new Matrix (prealloc_length, num_columns);
+	Matrix *tmp = new Matrix (prealloc_length, 3);
 	int i = start_of_node_field; // start i at 7
 	int vals_taken = 0;
 	int c = 0;
@@ -132,19 +127,13 @@ Matrix * build_nodes (int num_columns, int start_of_node_field, int start_of_tri
 	while (i < start_of_triangle_field - 2)
 	{ 
 		if (c == 3) {
-			c = 1;
-			r += 1;
+			c = 0;
+			r++;
+			i += 4; //skip ahead by 4, taken 3 coordinates.next 4 entires are irrelevant. Note that i is already pointing to an irrelevant entry, that's why it is 4 and not 5
 		}
-		mesh.getline(buf, MAX_CHARS_PER_LINE); //later getline
-		(*tmp)(r, c) = atof(buf);
-
-		c += 1;
-		vals_taken = vals_taken + 1;
-		i += 1;
-		if (vals_taken == 3) {
-			i += 4; //kip ahead by 4, taken 3 values (vertexes) already. Don't care about the next 3 or 4?? entries
-			vals_taken = 0;
-		}
+		(*tmp)(r, c) = data[i];
+		c ++;
+		i ++;
 	}
 	return tmp;
 }
@@ -235,17 +224,15 @@ int main ()
 		//cout << "LOOK AT THIS " << endl;
 		for (int i = 0; i < MAX_CHARS_PER_LINE; i++)
 		{
-			//cout << line_count << endl;
-			if (line_count == 1169) {
-				cout << current_line[i]; //current_line[i];
-			}
+			
 			//I think that all the \0 s can go because every line ends with \r
 			if (current_line[i] != ' ' && current_line[i] != '\r'&& current_line[i] != '\0')
 				SUBSTRING_EXISTS = true; //flag true so that we can grab a substring next time a space comes up
-			
+			if (current_line[i] == 'D')
+				current_line[i] = 'E'; //atoi recognizes E for floating point numbers, while text file contains D
 			if ((current_line[i] == ' ' || current_line[i] == '\r' || current_line[i] == '\0') && SUBSTRING_EXISTS) {
 				getNewSubstring(temp_ch_ar, current_line, start_idx, i);
-				double tmp = atof(temp_ch_ar);//getNewSubstring(current_line, start_idx, i));
+				double tmp = atof(temp_ch_ar);
 				if (!(current_line[start_idx] == '0' && i == start_idx + 1) && tmp == 0) //basically check if atof returned 0 for an array other than '0'. This means it was an invalid number
 						current[idx_for_current++] = -9999; //INVALID CHARACTER
 				else
@@ -266,7 +253,7 @@ int main ()
 
 	}
 	//	if (line_count == 2000) {
-			for (int i = 0; i < 258; i++)
+			for (int i = 258; i < 440; i++)
 				cout << "double " << i << " is: " << current[i] << endl;
 	//	}
 	cout << " TEST" << endl;
@@ -290,7 +277,7 @@ int main ()
 	
 	
 	return 0;
-	Matrix *nodes = build_nodes (3, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
+	Matrix *nodes = build_nodes (current, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
 	Matrix *triangles = build_triangles (3,start_of_triangle_field, end_of_triangle_field);
 	Matrix *normals = new Matrix (nodes->getLength(), 3);
 	Matrix *centroids = new Matrix (nodes->getLength(), 3);
