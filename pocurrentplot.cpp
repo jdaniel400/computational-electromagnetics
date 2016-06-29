@@ -217,20 +217,20 @@ int main ()
 	int start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
 	int line_count = 0; //self explanatory, used in parsing file
 	char *current_line = new char [MAX_CHARS_PER_LINE](); //the () is absolutely necessary to intialize the string to white space. Otherwise will be leftover values.
-	int prev, cur;
-	double current [50000]; //size of current is arbitrary
+	int prev, cur; //WHAT IS CUR????
+	double current [80000]; //size of current is arbitrary
 	bool SUBSTRING_EXISTS = false;
 	int idx_for_current = 0;
-	bool delete_this_flag;
 
 
 	for (int i = 0; i < 80; i++)
-		mesh.getline(current_line, MAX_CHARS_PER_LINE);
+		mesh.getline(current_line, MAX_CHARS_PER_LINE); // grab a few redundant characters. This isn't really necessary
 
-	char * temp_ch_ar = NULL; //move later
+	char * temp_ch_ar = NULL; //character array that holds the result of the number substring of a current line (eg "12e-3")
 
 	while (mesh.getline(current_line, MAX_CHARS_PER_LINE)) 
 	{
+		cout << line_count << endl;
 		int start_idx = 0;
 		//cout << "LOOK AT THIS " << endl;
 		for (int i = 0; i < MAX_CHARS_PER_LINE; i++)
@@ -240,8 +240,6 @@ int main ()
 				cout << current_line[i]; //current_line[i];
 			}
 			//I think that all the \0 s can go because every line ends with \r
-			if (current_line[i] == '0') 
-				delete_this_flag = true; //breakpoint statement
 			if (current_line[i] != ' ' && current_line[i] != '\r'&& current_line[i] != '\0')
 				SUBSTRING_EXISTS = true; //flag true so that we can grab a substring next time a space comes up
 			
@@ -249,7 +247,7 @@ int main ()
 				getNewSubstring(temp_ch_ar, current_line, start_idx, i);
 				double tmp = atof(temp_ch_ar);//getNewSubstring(current_line, start_idx, i));
 				if (!(current_line[start_idx] == '0' && i == start_idx + 1) && tmp == 0) //basically check if atof returned 0 for an array other than '0'. This means it was an invalid number
-						current[idx_for_current++] = -9876543210;
+						current[idx_for_current++] = -9999; //INVALID CHARACTER
 				else
 					current[idx_for_current++] = tmp;
 				SUBSTRING_EXISTS = false; //reset flag to false
@@ -263,47 +261,35 @@ int main ()
 
 		
 		line_count++;
-		//delete current_line;
+		delete [] current_line;
 		current_line = new char [MAX_CHARS_PER_LINE](); //must initialize, get rid of whatever is before
 
 	}
 	//	if (line_count == 2000) {
-			for (int i = 0; i < 200; i++)
+			for (int i = 0; i < 258; i++)
 				cout << "double " << i << " is: " << current[i] << endl;
 	//	}
 	cout << " TEST" << endl;
-	return 0;
-	for (int i = 0; i < 50000; i++)
-	{
-		if (current[i] == 2411 && prev == -1)
-			start_of_node_field = line_count + 5;
-		if (cur == 2412 && prev == -1)
-			start_of_triangle_field = line_count + 1; 
-		if (cur == 2420 && prev == -1)
-			end_of_triangle_field = line_count - 2;
-
-
-	}
-
-
-		//if (line_count > 76) break;
-		cur = atoi(current_line);
-		if (cur == 2411 && prev == -1)
-			start_of_node_field = line_count + 5;
-		if (cur == 2412 && prev == -1)
-			start_of_triangle_field = line_count + 1; 
-		if (cur == 2420 && prev == -1)
-			end_of_triangle_field = line_count - 2;
-
-
-		//I chose to exclude the matlab safeguard for smaller meshes and triangle field, because I think that is has been made obsolete
-		prev = cur;
-		for (int z = 0; z < MAX_CHARS_PER_LINE; z++) {
-	//		cout << current_line[z];
-		} 
-
 	
 
+	prev = current[0]; //prev variable used in detecting start field markers, initialize to first element
+	for (int i = 0; i < 80000; i++)
+	{
+		if (current[i] == 2411 && prev == -1)
+			start_of_node_field = i + 5;
+		if (current[i] == 2412 && prev == -1)
+			start_of_triangle_field = i + 1; 
+		if (current[i] == 2420 && prev == -1)
+			end_of_triangle_field = i - 2;
+
+		prev = current[i];
+	}
+	cout << "start of node field " << current[start_of_node_field] << "(" << start_of_node_field << ")" << endl;
+	cout << "start of triangle field " << current[start_of_triangle_field] << "(" << start_of_triangle_field << ")" << endl;
+	cout << "end of triangle field " << current[end_of_triangle_field] << "(" << end_of_triangle_field << ")" << endl;
+	
+	
+	return 0;
 	Matrix *nodes = build_nodes (3, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
 	Matrix *triangles = build_triangles (3,start_of_triangle_field, end_of_triangle_field);
 	Matrix *normals = new Matrix (nodes->getLength(), 3);
