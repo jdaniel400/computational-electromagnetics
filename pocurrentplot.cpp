@@ -22,7 +22,7 @@ public:
 
 
 
-private:
+//private:
 	double ** matrix;
 	int number_of_rows;
 };
@@ -41,7 +41,6 @@ double& Matrix::operator()(int row, int col) const
 
 int Matrix::getLength()
 {
-	cout << "size is " << number_of_rows << endl; // sizeof(matrix)/sizeof(matrix[0]);
 	return number_of_rows; //sizeof(matrix)/sizeof(matrix[0]);
 }
 
@@ -51,9 +50,9 @@ Matrix & Matrix::cross (Matrix & arg_vect)
 	//This is the formula for cross product, implemented iteratively for each row of the matrices
 	for (int i = 0; i < getLength(); i++)
 	{
-		(*result)(i,0) = matrix[i][1] * arg_vect(i,2) - matrix[i][2] * arg_vect(i,1);
-		(*result)(i,1) = matrix[i][2] * arg_vect(i,0) - matrix[i][0] * arg_vect(i,2);
-		(*result)(i,2) = matrix[i][0] * arg_vect(i,1) - matrix[i][1] * arg_vect(i,0);
+		(*result)(i,0) = matrix[1][i] * arg_vect(i,2) - matrix[2][i] * arg_vect(i,1); //note that matrix[][] convention is the opposite of (*matrix) (,) convetion
+		(*result)(i,1) = matrix[2][i] * arg_vect(i,0) - matrix[0][i] * arg_vect(i,2); //it seemed  more natural to create the matrices in this way
+		(*result)(i,2) = matrix[0][i] * arg_vect(i,1) - matrix[1][i] * arg_vect(i,0); //and the to flip in the (,) overload
 	}
 	return *result;
 }
@@ -62,10 +61,10 @@ void Matrix::normalize ()
 {
 	for (int i = 0; i < getLength(); i++)
 	{
-		double length = sqrt(matrix[i][0] * matrix[i][0] + matrix[i][1] * matrix[i][1] + matrix[i][2] * matrix[i][2]);	
-		matrix[i][0] = matrix[i][0] / length;
-		matrix[i][1] = matrix[i][1] / length;
-		matrix[i][2] = matrix[i][2] / length;
+		double length = sqrt(matrix[0][i] * matrix[0][i] + matrix[1][i] * matrix[1][i] + matrix[2][i] * matrix[2][i]);	
+		matrix[0][i] = matrix[0][i] / length;
+		matrix[1][i] = matrix[1][i] / length;
+		matrix[2][i] = matrix[2][i] / length;
 	}
 
 }
@@ -83,7 +82,6 @@ void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, int 
     		int nodeC = triangles(i,2);
   	  	for (int j = 0; j < 3; j++)
     			pts_A (i, j) = nodes (nodeA, j);
-
  	   	for (int j = 0; j < 3; j++)
     			pts_B (i, j) = nodes (nodeB, j);
     		for (int j = 0; j < 3; j++)
@@ -162,7 +160,6 @@ Matrix * build_triangles (double * data, int start_of_triangle_field, int end_of
 			i += 6;
  		}
 		(*tmp)(r, c) = data[i];
-		//cout << "row " << r << " column " << c << "entry " << data[i] << endl;
  	   	c ++;
  	   	i ++;
 
@@ -172,24 +169,12 @@ Matrix * build_triangles (double * data, int start_of_triangle_field, int end_of
 
 void getNewSubstring (char *& result, char * charArray, int start_index_inclusive, int end_index_exclusive)
 {
-	
-/*	char * newString = new char [(end_index_exclusive - 1) - start_index_inclusive];
-	for (int x = 0; x < end_index_exclusive; x++)
-		newString[x] = charArray[x];
-	result = newString;
-	//return newString;
-*/	if (start_index_inclusive == end_index_exclusive) {
-		cout << "tried to print a substring of size zero at line " << charArray << " but only wanted: '" << charArray[start_index_inclusive] << "'" << endl;
-		return;
-	}
 	if (result != NULL)
 		delete[] result;	
 	result = new char [end_index_exclusive - start_index_inclusive + 1]; //+ 1 for null terminating char
 	for (int x = start_index_inclusive; x < end_index_exclusive; x++)
 		result[x - start_index_inclusive] = charArray[x];
 	result[end_index_exclusive - start_index_inclusive] = '\0'; 
-	//result = newString;
-	//return newString;
 }
 
 int main ()
@@ -214,7 +199,6 @@ int main ()
 	{
 		cout << line_count << endl;
 		int start_idx = 0;
-		//cout << "LOOK AT THIS " << endl;
 		for (int i = 0; i < MAX_CHARS_PER_LINE; i++)
 		{
 			
@@ -258,7 +242,7 @@ int main ()
 		if (current[i] == 2411 && prev == -1)
 			start_of_node_field = i + 5;
 		if (current[i] == 2412 && prev == -1)
-			start_of_triangle_field = i + 1; // + 6 ?????? for the bottom 3 it should be + 6
+			start_of_triangle_field = i + 1; 
 		if (current[i] == 2420 && prev == -1)
 			end_of_triangle_field = i - 2;
 
@@ -272,15 +256,15 @@ int main ()
 	
 	Matrix *nodes = build_nodes (current, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
 	Matrix *triangles = build_triangles (current, start_of_triangle_field, end_of_triangle_field);
-	Matrix *normals = new Matrix (nodes->getLength(), 3);
-	Matrix *centroids = new Matrix (nodes->getLength(), 3);
+	Matrix *normals = new Matrix (triangles->getLength(), 3);
+	Matrix *centroids = new Matrix (triangles->getLength(), 3);
 	calculate_Centroids_and_Normals (*centroids, *normals, triangles->getLength(), *nodes, *triangles);
 	
-	for (int i = 0; i < nodes->getLength(); i++)
-		cout << (*normals) (i, 0) << " " << (*normals) (i, 1) << " " << (*normals) (i, 2) << endl;
+	for (int i = nodes->getLength() - 31; i < nodes->getLength(); i++)
+		cout << "node " << i + 1 << ": " << (*normals) (i, 0) << " " << (*normals) (i, 1) << " " << (*normals) (i, 2) << endl;
 	
-	for (int i = 0; i < nodes->getLength(); i++)
-		cout << (*centroids)(i, 0) << " " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
+	for (int i = centroids->getLength() - 31; i < centroids->getLength(); i++)
+		cout << "centroid " << i + 1 << ": " << (*centroids)(i, 0) << " " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
 
 	
 	mesh.close();
