@@ -90,8 +90,11 @@ void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, int 
     			vect1(i, j) = nodes(nodeA, j) - nodes(nodeB, j);
     		for (int j = 0; j < 3; j++)
     			vect2(i, 1) = nodes(nodeA, j) - nodes(nodeC, j);
-	
 
+		//cout << "pts_A " << i << " " << pts_A (i, 0) << " " << pts_A (i, 1) << " " << pts_A (i, 2) << endl;
+		//cout << "pts_B " << pts_B (i, 0) << " "<< pts_B (i, 1) << " " << pts_B (i, 2) << endl;
+		//cout << "pts_C " << pts_C (i, 0) << " "<< pts_C (i, 1) << " " << pts_C (i, 2) << endl;
+		
 		centroids (i, 0) = (pts_A(i, 0) + pts_B(i, 0) + pts_C(i, 0)) / 3;
 		centroids (i, 1) = (pts_A(i, 1) + pts_B(i, 1) + pts_C(i, 1)) / 3;
 		centroids (i, 2) = (pts_A(i, 2) + pts_B(i, 2) + pts_C(i, 2)) / 3;
@@ -159,7 +162,7 @@ Matrix * build_triangles (double * data, int start_of_triangle_field, int end_of
  	    		r++;
 			i += 6;
  		}
-		(*tmp)(r, c) = data[i];
+		(*tmp)(r, c) = data[i] - 1; //IMPORTANT: SUBTRACT 1. ALL ENTRIES IN TRIANGLE MATRIX REFER TO A OFFSET 1 TRIANGLE, NOT OFFSET 0 (THIS IS THE FILE CONVENTION)
  	   	c ++;
  	   	i ++;
 
@@ -210,9 +213,9 @@ int main ()
 			if ((current_line[i] == ' ' || current_line[i] == '\r' || current_line[i] == '\0') && SUBSTRING_EXISTS) {
 				getNewSubstring(temp_ch_ar, current_line, start_idx, i);
 				double tmp = atof(temp_ch_ar);
-				if (!(current_line[start_idx] == '0' && i == start_idx + 1) && tmp == 0) //basically check if atof returned 0 for an array other than '0'. This means it was an invalid number
-						current[idx_for_current++] = -9999; //INVALID CHARACTER
-				else
+				//if (!(current_line[start_idx] == '0' && i == start_idx + 1) && tmp == 0) //basically check if atof returned 0 for an array other than '0'. This means it was an invalid number
+				//		current[idx_for_current++] = -9999; //INVALID CHARACTER
+			//	else
 					current[idx_for_current++] = tmp;
 				SUBSTRING_EXISTS = false; //reset flag to false
 				start_idx = i + 1;
@@ -260,12 +263,19 @@ int main ()
 	Matrix *centroids = new Matrix (triangles->getLength(), 3);
 	calculate_Centroids_and_Normals (*centroids, *normals, triangles->getLength(), *nodes, *triangles);
 	
-	for (int i = nodes->getLength() - 31; i < nodes->getLength(); i++)
-		cout << "node " << i + 1 << ": " << (*normals) (i, 0) << " " << (*normals) (i, 1) << " " << (*normals) (i, 2) << endl;
 	
-	for (int i = centroids->getLength() - 31; i < centroids->getLength(); i++)
-		cout << "centroid " << i + 1 << ": " << (*centroids)(i, 0) << " " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
-
+/*	for (int i = nodes->getLength() - 401; i < nodes->getLength(); i++)
+		cout << "nodes" << i << ": " << (*nodes) (i, 0) << " " << (*nodes) (i, 1) << " " << (*nodes) (i, 2) << endl;
+	
+	for (int i = triangles->getLength() - 31; i < triangles->getLength(); i++)
+		cout << "triangle " << i << ": " << (*triangles)(i, 0) << " " << (*triangles)(i, 1) << " " << (*triangles)(i, 2) << endl;
+*/
+	for (int i = normals->getLength() - 310; i < normals->getLength(); i++)
+		cout << "normals " << i << ": " << (*normals) (i, 0) << " " << (*normals) (i, 1) << " " << (*normals) (i, 2) << endl;
+	
+/*	for (int i = centroids->getLength() - 31; i < centroids->getLength(); i++)
+		cout << "centroid " << i << ": " << (*centroids)(i, 0) << " " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
+*/
 	
 	mesh.close();
 	return 0;
