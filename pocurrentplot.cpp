@@ -62,6 +62,8 @@ void Matrix::normalize ()
 	for (int i = 0; i < getLength(); i++)
 	{
 		double length = sqrt(matrix[0][i] * matrix[0][i] + matrix[1][i] * matrix[1][i] + matrix[2][i] * matrix[2][i]);	
+		if (length == 0)
+			cout << "error with 0 at" <<  i << ", check into " << endl;	
 		matrix[0][i] = matrix[0][i] / length;
 		matrix[1][i] = matrix[1][i] / length;
 		matrix[2][i] = matrix[2][i] / length;
@@ -86,10 +88,10 @@ void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, int 
     			pts_B (i, j) = nodes (nodeB, j);
     		for (int j = 0; j < 3; j++)
     			pts_C (i, j) = nodes (nodeC, j);
-    		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < 3; j++)
     			vect1(i, j) = nodes(nodeA, j) - nodes(nodeB, j);
-    		for (int j = 0; j < 3; j++)
-    			vect2(i, 1) = nodes(nodeA, j) - nodes(nodeC, j);
+	  	for (int j = 0; j < 3; j++)
+    			vect2(i, j) = nodes(nodeA, j) - nodes(nodeC, j);
 
 		//cout << "pts_A " << i << " " << pts_A (i, 0) << " " << pts_A (i, 1) << " " << pts_A (i, 2) << endl;
 		//cout << "pts_B " << pts_B (i, 0) << " "<< pts_B (i, 1) << " " << pts_B (i, 2) << endl;
