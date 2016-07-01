@@ -13,6 +13,7 @@ public:
 	Matrix (const int num_rows, const int num_columns);
 	//const double& operator()(int row, int col) const;
 	Matrix & cross (Matrix & arg_vect);
+	double dot (Matrix & arg_vect);
 	double& operator()(int row, int col) const;
 	int getLength();
 	void normalize();
@@ -57,6 +58,18 @@ Matrix & Matrix::cross (Matrix & arg_vect)
 	return *result;
 }
 
+double  Matrix::dot (Matrix & arg_vect)
+{	
+	/*Function takes on a Matrix assumed to be a 1 x 3 vector. arg_vect must be 1 x 3, no other size will be acceptable.
+ * 	Update: This function assumes that this Matrix is a 1 x 3 vector.
+ * 	Returns result as a double floating point */
+
+//	double * result = new double [getLength()];
+//	for (int i = 0; i < getLength(); i++)
+	return  matrix[0][0] * arg_vect (0, 0) + matrix[1][0] * arg_vect (0, 1) + matrix[2][0] * arg_vect (0, 2);		
+	
+		
+}
 void Matrix::normalize ()
 {
 	for (int i = 0; i < getLength(); i++)
@@ -72,7 +85,7 @@ void Matrix::normalize ()
 }
 void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, int num_triangles, Matrix & nodes, Matrix & triangles)
 {
-	Matrix pts_A = *new Matrix (num_triangles, 3);
+	Matrix pts_A = *new Matrix (num_triangles, 3); //RESOLVE: Possible memory leaks?????? Derefencing new object, calling copy constructor, then moving on?
 	Matrix pts_B = *new Matrix (num_triangles, 3);
 	Matrix pts_C = *new Matrix (num_triangles, 3);
 	Matrix vect1 = *new Matrix (num_triangles, 3);
@@ -182,15 +195,13 @@ void getNewSubstring (char *& result, char * charArray, int start_index_inclusiv
 	result[end_index_exclusive - start_index_inclusive] = '\0'; 
 }
 
-int main ()
-{
+double * parseAndBuildData (const char *file_name, int & start_of_node_field, int & start_of_triangle_field, int & end_of_triangle_field) {
 	ifstream mesh;
-	mesh.open("shape.txt");
-	int start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
+	mesh.open(file_name);
 	int line_count = 0; //self explanatory, used in parsing file
 	char *current_line = new char [MAX_CHARS_PER_LINE](); //the () is absolutely necessary to intialize the string to white space. Otherwise will be leftover values.
 	int prev, cur; //WHAT IS CUR????
-	double current [80000]; //size of current is arbitrary
+	double *current = new double [80000]; //size of current is arbitrary
 	bool SUBSTRING_EXISTS = false;
 	int idx_for_current = 0;
 
@@ -256,15 +267,53 @@ int main ()
 	cout << "start of node field " << current[start_of_node_field] << "(" << start_of_node_field << ")" << endl;
 	cout << "start of triangle field " << current[start_of_triangle_field] << "(" << start_of_triangle_field << ")" << endl;
 	cout << "end of triangle field " << current[end_of_triangle_field] << "(" << end_of_triangle_field << ")" << endl;
+	mesh.close();
+	return current;
+}
+
+Matrix * calculateIlluminatedTriangles (Matrix & torch, Matrix & normals)
+{
+	/* Takes on torch vector and normal matrix. Torch vector is assumed to be a 1 x 3 vector, incidicates direction of incident E-field
+ * 	normals represents normal vector of each triangle in the mesh. Assumed to be n x 3. 
+ * 	Function will take cross product of every row of normals with torch vector, return a n x 1 matrix consisting of 1's and zeroes.
+ * 	The returned matrix data can be interpreted as : 1 - Corresponding triangle is illuminated by torch. 0 - Corresponding triangle is not illuminated by torch.
+ * 	Function will allocate memory for return matrix, and must be freed by the caller. */
+	/* Notes: I decided to switch to this implementation, where the row is extracted seperately from the normals matrix and passed into a dot product method that
+	returns the result of a single operation, because it would be the most efficient way while maintaining a generalized dot product method */
+
+	Matrix *illuminated = new Matrix (normals.getLength(), 1); //allocate new matrix to return
+	for (int i = 0; i < normals.getLength(); i++) { //iterate through all normal vectors
+		Matrix *current_normals_vector = new Matrix (1, 3); //create a new vector to store the current row
+		(*current_normals_vector) (0, 0) = normals (i, 0); //concatenate normals x y z entries into one vector
+		(*current_normals_vector) (0, 1) = normals (i, 1);
+		(*current_normals_vector) (0, 2) = normals (i, 2);
+		(*illuminated) (i, 0) = (*current_normals_vector).dot(torch); // (torch, normals (i, current_normals_vector)); //take dot product of current normals row with the torch and store in return value array
+		if ((*illuminated) (i, 0) < -.00000000000001) //arbitrary threshold around 0 to determine 1/0 cutoff
+			(*illuminated) (i, 0) = 1; //illuminated
+		else
+			(*illuminated)(i, 0) = 0; //not illuminated
+		delete current_normals_vector; //Must delete the allocated vector, avoid a memory leak
+	}
+	return  illuminated;
+}
+
+int main ()
+{
 	
 	
 	
-	Matrix *nodes = build_nodes (current, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
-	Matrix *triangles = build_triangles (current, start_of_triangle_field, end_of_triangle_field);
+	int start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
+	double  * data = parseAndBuildData ("shape.txt", start_of_node_field, start_of_triangle_field, end_of_triangle_field);
+	Matrix *nodes = build_nodes (data, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
+	Matrix *triangles = build_triangles (data, start_of_triangle_field, end_of_triangle_field);
 	Matrix *normals = new Matrix (triangles->getLength(), 3);
 	Matrix *centroids = new Matrix (triangles->getLength(), 3);
 	calculate_Centroids_and_Normals (*centroids, *normals, triangles->getLength(), *nodes, *triangles);
 	
+	Matrix torch = *new Matrix (1, 3); //direction vector of incident E-field
+	torch (0, 0) = 0; torch (0, 1) = 0; torch (0, 2) = 1; //completely arbitrary direction of the incident Electromagnetic field	
+	
+	Matrix *illuminated = calculateIlluminatedTriangles (torch, *normals); //build the illuminated vector, binary representation of illuminated triangle/shadowed triangle for each triangle in the mesh
 	
 /*	for (int i = nodes->getLength() - 401; i < nodes->getLength(); i++)
 		cout << "nodes" << i << ": " << (*nodes) (i, 0) << " " << (*nodes) (i, 1) << " " << (*nodes) (i, 2) << endl;
@@ -279,7 +328,6 @@ int main ()
 		cout << "centroid " << i << ": " << (*centroids)(i, 0) << " " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
 */
 	
-	mesh.close();
 	return 0;
 }
 
