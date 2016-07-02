@@ -3,8 +3,10 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <complex>
 
 #define MAX_CHARS_PER_LINE 93
+#define PI 3.141592653589793238463 //could use confirmation
 using namespace std;
 
 class Matrix
@@ -297,6 +299,32 @@ Matrix * calculateIlluminatedTriangles (Matrix & torch, Matrix & normals)
 	return  illuminated;
 }
 
+Matrix * generateEFieldIncident (Matrix * illuminated, Matrix & polarizing_vector, Matrix & torch, Matrix * centroids)
+{
+	/* This function will generate an incident E field according to Electromagnetic wave equations
+	illuminated points to matrix incidicating binary indicator that E field is incidient on triangle or not
+	polarizing vector is a property of the E field, arbitrary
+	torch: direction of propgation of the incident field
+	centroids : matrix containing x y z coordinates of the centroids of the triangles in the mesh
+	INSERT LAMBDA CONSTRAINTS HERE 
+	*/
+
+	int lambda = 138; //need to verify that this is, in fact, lambda. what
+	Matrix * IncidentElectricField = new Matrix (centroids->getLength(), 3); //incident E field
+	for (int j  = 0; j < centroids->getLength(); j++) { 
+		std::complex<double> complex_number (0,0); //complex number placeholder
+		std::complex<double> i(0, 1); //the complex variable i
+		Matrix * cur_centroid = new Matrix (1, 3); //dot product precalculation
+		(*cur_centroid)(0, 0)  = (*centroids) (j, 0); //set equal to the current centroid in the matrix
+		(*cur_centroid)(0, 1)  = (*centroids) (j, 1);
+		(*cur_centroid)(0, 2) = (*centroids) (j, 2);
+		complex_numer = exp (i *(lambda * PI) *  torch.dot(*cur_centroid)); //wave Eqn
+	  	(*IncidentElectricField) (j, 0) = (*illuminated) (j, 0) * polarizing_vector(0, 0) * complex_number; //implemented vector multiplication manually
+		(*IncidentElectricField) (j, 1) = (*illuminated) (j, 1) * polarizing_vector(0, 1) * complex_number; //no need to transpose polarizing vector
+		(*IncidentElectricField) (j, 2) = (*illuminated) (j, 2) * polarizing_vector(0, 2) * complex_number;
+	}
+	return IncidentElectricField;
+}
 int main ()
 {
 	
@@ -314,6 +342,14 @@ int main ()
 	torch (0, 0) = 0; torch (0, 1) = 0; torch (0, 2) = 1; //completely arbitrary direction of the incident Electromagnetic field	
 	
 	Matrix *illuminated = calculateIlluminatedTriangles (torch, *normals); //build the illuminated vector, binary representation of illuminated triangle/shadowed triangle for each triangle in the mesh
+	
+	Matrix polarizing_vector = *new Matrix (1, 3);
+	polarizing_vector =  *new Matrix (1,3);
+	polarizing_vector (0,0) = 1; polarizing_vector (0,1) = 0; polarizing_vector (0, 2) = 0;
+	
+	Matrix * precalc_exponentials = new Matrix (normals->getLength(), 3);
+
+	generateEFieldIncident (illuminated, polarizing_vector, torch, centroids);
 	
 /*	for (int i = nodes->getLength() - 401; i < nodes->getLength(); i++)
 		cout << "nodes" << i << ": " << (*nodes) (i, 0) << " " << (*nodes) (i, 1) << " " << (*nodes) (i, 2) << endl;
