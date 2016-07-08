@@ -5,6 +5,7 @@
 #include <fstream>
 #include <complex>
 
+#define MAX_LINES 300000
 #define MAX_CHARS_PER_LINE 93
 #define PI 3.141592653589793238463 //could use confirmation
 using namespace std;
@@ -12,21 +13,21 @@ template <class T>
 class Matrix
 {
 public:
-	Matrix (const int num_rows, const int num_columns);
+	Matrix (const long num_rows, const long num_columns);
 	Matrix & cross (Matrix & arg_vect);
 	T dot (Matrix<double> & arg_vect);
-	T& operator()(int row, int col) const;
-	int getLength();
+	T& operator()(long row, long col) const;
+	long getLength();
 	void normalize();
-	void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, int num_triangles, Matrix & nodes, Matrix & triangles);
-	Matrix * build_nodes (int num_columns, int start_of_node_field, int start_of_triangle_field);
-	Matrix * build_triangles (int num_columns, int start_of_triangle_field, int end_of_triangle_field);
+	void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, long num_triangles, Matrix & nodes, Matrix & triangles);
+	Matrix * build_nodes (long num_columns, long start_of_node_field, long start_of_triangle_field);
+	Matrix * build_triangles (long num_columns, long start_of_triangle_field, long end_of_triangle_field);
 
 
 
 //private:
 	T ** matrix; //Matrix class was templatized to support complex numbers
-	int number_of_rows;
+	long number_of_rows;
 };
 
 /*const double& Matrix::operator()(int row, int col) const
@@ -35,14 +36,14 @@ public:
 }
 */
 template <class T>
-T& Matrix<T>::operator()(int row, int col) const
+T& Matrix<T>::operator()(long row, long col) const
 {
 	//note that it is ROW (Y) and then COL (X). MATLAB CONVENTION FORMAT
 	return matrix[col][row]; //will return reference to cell entry, but can be modified
 }
 
 template <class T>
-int Matrix<T>::getLength()
+long Matrix<T>::getLength()
 {
 	return number_of_rows; //sizeof(matrix)/sizeof(matrix[0]);
 }
@@ -53,7 +54,7 @@ Matrix<T> & Matrix<T>::cross (Matrix & arg_vect)
 	assumes that template type supports * operator */
 	Matrix<T> *result = new Matrix<T> (getLength(), 3);
 	//This is the formula for cross product, implemented iteratively for each row of the matrices
-	for (int i = 0; i < getLength(); i++)
+	for (long i = 0; i < getLength(); i++)
 	{
 		(*result)(i,0) = matrix[1][i] * arg_vect(i,2) - matrix[2][i] * arg_vect(i,1); //note that matrix[][] convention is the opposite of (*matrix) (,) convetion
 		(*result)(i,1) = matrix[2][i] * arg_vect(i,0) - matrix[0][i] * arg_vect(i,2); //it seemed  more natural to create the matrices in this way
@@ -78,7 +79,7 @@ template <class T>
 void Matrix<T>::normalize ()
 {
 	/* Assumes that normalize will only be called on a Matrix of type double */
-	for (int i = 0; i < getLength(); i++)
+	for (long i = 0; i < getLength(); i++)
 	{
 		double length = sqrt(matrix[0][i] * matrix[0][i] + matrix[1][i] * matrix[1][i] + matrix[2][i] * matrix[2][i]);	
 		if (length == 0)
@@ -89,7 +90,7 @@ void Matrix<T>::normalize ()
 	}
 
 }
-void calculate_Centroids_and_Normals (Matrix<double> & centroids, Matrix<double> & normals, int num_triangles, Matrix<double> & nodes, Matrix<double> & triangles)
+void calculate_Centroids_and_Normals (Matrix<double> & centroids, Matrix<double> & normals, long num_triangles, Matrix<double> & nodes, Matrix<double> & triangles)
 {
 	Matrix<double> pts_A = *new Matrix<double> (num_triangles, 3); //RESOLVE: Possible memory leaks?????? Derefencing new object, calling copy constructor, then moving on?
 	Matrix<double> pts_B = *new Matrix<double> (num_triangles, 3);
@@ -97,10 +98,10 @@ void calculate_Centroids_and_Normals (Matrix<double> & centroids, Matrix<double>
 	Matrix<double> vect1 = *new Matrix<double> (num_triangles, 3);
 	Matrix<double> vect2 = *new Matrix<double> (num_triangles, 3);
 
-	for (int i = 0; i < num_triangles; i++) {
-		int nodeA = triangles(i,0); //triangles will always contain integers (in floating point format)
-   		int nodeB = triangles(i,1);
-    		int nodeC = triangles(i,2);
+	for (long i = 0; i < num_triangles; i++) {
+		long nodeA = triangles(i,0); //triangles will always contain integers (in floating point format)
+   		long nodeB = triangles(i,1);
+    		long nodeC = triangles(i,2);
   	  	for (int j = 0; j < 3; j++)
     			pts_A (i, j) = nodes (nodeA, j); 
  	   	for (int j = 0; j < 3; j++)
@@ -127,29 +128,29 @@ void calculate_Centroids_and_Normals (Matrix<double> & centroids, Matrix<double>
 
 }
 template <class T>
-Matrix<T>::Matrix (const int num_rows, const int num_columns)
+Matrix<T>::Matrix (const long num_rows, const long num_columns)
 {
 	matrix = new T*[num_columns];
 
-	for (int i = 0; i < num_columns; i++)
+	for (long i = 0; i < num_columns; i++)
 		matrix[i] = new T [num_rows];
 
-	for (int j = 0; j < num_columns; j++)
-		for (int i = 0; i < num_rows; i++)
+	for (long j = 0; j < num_columns; j++)
+		for (long i = 0; i < num_rows; i++)
 			matrix[j][i] = 0; //implemented this just because original MATLAB code called for zeros.
 	number_of_rows = num_rows;
 }
 
 
-Matrix<double> * build_nodes (double * data, int start_of_node_field, int start_of_triangle_field)
+Matrix<double> * build_nodes (double * data, long start_of_node_field, long start_of_triangle_field)
 
 {
-	int prealloc_length = ((start_of_triangle_field - 3 - start_of_node_field) / 7) + 1; // added + 1 because originally MATLAB called for ceil
+	long prealloc_length = ((start_of_triangle_field - 3 - start_of_node_field) / 7) + 1; // added + 1 because originally MATLAB called for ceil
 	Matrix<double> *tmp = new Matrix<double> (prealloc_length, 3);
-	int i = start_of_node_field; // start i at 7
+	long i = start_of_node_field; // start i at 7
 	int vals_taken = 0;
-	int c = 0;
-	int r = 0;
+	long c = 0;
+	long r = 0;
 	while (i < start_of_triangle_field - 3) //if we opt for + 6 in main, this should change to - 8
 	{ 
 		if (c == 3) {
@@ -166,15 +167,15 @@ Matrix<double> * build_nodes (double * data, int start_of_node_field, int start_
 }
 
 
-Matrix<double> * build_triangles (double * data, int start_of_triangle_field, int end_of_triangle_field)
+Matrix<double> * build_triangles (double * data, long start_of_triangle_field, long end_of_triangle_field)
 {
 	//NOTE: Start of the triangle field has been designated as the first node number (with the code + 1) as of 6-29-16
-	int prealloc_length = (end_of_triangle_field  - (start_of_triangle_field + 6))/9 + 1;
+	long prealloc_length = (end_of_triangle_field  - (start_of_triangle_field + 6))/9 + 1;
 	Matrix<double> *tmp = new Matrix<double> ((prealloc_length), 3);
-	int i = start_of_triangle_field + 6; //begin at the first node (this is dependent on the parsing process)
+	long i = start_of_triangle_field + 6; //begin at the first node (this is dependent on the parsing process)
 	int vals_taken = 0;
-	int c = 0;
-	int r = 0;
+	long c = 0;
+	long r = 0;
 	while (i < end_of_triangle_field)
 	{
   		if (c == 3)
@@ -201,15 +202,16 @@ void getNewSubstring (char *& result, char * charArray, int start_index_inclusiv
 	result[end_index_exclusive - start_index_inclusive] = '\0'; 
 }
 
-double * parseAndBuildData (const char *file_name, int & start_of_node_field, int & start_of_triangle_field, int & end_of_triangle_field) {
+double * parseAndBuildData (const char *file_name, long & start_of_node_field, long & start_of_triangle_field, long & end_of_triangle_field) {
 	ifstream mesh;
 	mesh.open(file_name);
-	int line_count = 0; //self explanatory, used in parsing file
+	long line_count = 0; //self explanatory, used in parsing file
 	char *current_line = new char [MAX_CHARS_PER_LINE](); //the () is absolutely necessary to intialize the string to white space. Otherwise will be leftover values.
-	int prev, cur; //WHAT IS CUR????
-	double *current = new double [80000]; //size of current is arbitrary
+	long prev, cur; //WHAT IS CUR????
+	double *current = new double [MAX_LINES]; //size of current is arbitrary
 	bool SUBSTRING_EXISTS = false;
-	int idx_for_current = 0;
+	long idx_for_current = 0;
+
 
 
 	for (int i = 0; i < 185; i++)
@@ -219,7 +221,7 @@ double * parseAndBuildData (const char *file_name, int & start_of_node_field, in
 
 	while (mesh.getline(current_line, MAX_CHARS_PER_LINE)) 
 	{
-		cout << line_count << endl;
+	//	cout << line_count << endl;
 		int start_idx = 0;
 		for (int i = 0; i < MAX_CHARS_PER_LINE; i++)
 		{
@@ -259,10 +261,11 @@ double * parseAndBuildData (const char *file_name, int & start_of_node_field, in
 	
 
 	prev = current[0]; //prev variable used in detecting start field markers, initialize to first element
-	for (int i = 0; i < 80000; i++)
+	for (long i = 0; i < MAX_LINES; i++)
 	{
-		if (current[i] == 2411 && prev == -1)
+		if (current[i] == 2411 && prev == -1) {
 			start_of_node_field = i + 5;
+			cout << "set at " << start_of_node_field << endl; }
 		if (current[i] == 2412 && prev == -1)
 			start_of_triangle_field = i + 1; 
 		if (current[i] == 2420 && prev == -1)
@@ -288,7 +291,7 @@ Matrix<int> * calculateIlluminatedTriangles (Matrix<double> & torch, Matrix<doub
 	returns the result of a single operation, because it would be the most efficient way while maintaining a generalized dot product method */
 
 	Matrix<int> *illuminated = new Matrix<int> (normals.getLength(), 1); //allocate new matrix to return
-	for (int i = 0; i < normals.getLength(); i++) { //iterate through all normal vectors
+	for (long i = 0; i < normals.getLength(); i++) { //iterate through all normal vectors
 		Matrix<double> *current_normals_vector = new Matrix<double> (1, 3); //create a new vector to store the current row
 		(*current_normals_vector) (0, 0) = normals (i, 0); //concatenate normals x y z entries into one vector
 		(*current_normals_vector) (0, 1) = normals (i, 1);
@@ -315,7 +318,7 @@ Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Ma
 
 	int lambda = 138; //need to verify that this is, in fact, lambda. what
 	Matrix<complex<double> > * IncidentElectricField = new Matrix<complex<double> > (centroids->getLength(), 3); //incident E field
-	for (int j  = 0; j < centroids->getLength(); j++) { 
+	for (long j  = 0; j < centroids->getLength(); j++) { 
 		std::complex<double> complex_number (0,0); //complex number placeholder
 		std::complex<double> i(0, 1); //the complex variable i
 		Matrix<double> * cur_centroid = new Matrix <double>(1, 3); //dot product precalculation
@@ -324,8 +327,8 @@ Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Ma
 		(*cur_centroid)(0, 2) = (*centroids) (j, 2);
 		complex_number = exp (i *(lambda * PI) *  torch.dot(*cur_centroid)); //wave Eqn
 	  	(*IncidentElectricField) (j, 0) = (*illuminated) (j, 0) * polarizing_vector(0, 0) * complex_number; //implemented vector multiplication manually
-		(*IncidentElectricField) (j, 1) = (*illuminated) (j, 1) * polarizing_vector(0, 1) * complex_number; //no need to transpose polarizing vector
-		(*IncidentElectricField) (j, 2) = (*illuminated) (j, 2) * polarizing_vector(0, 2) * complex_number;
+		(*IncidentElectricField) (j, 1) = (*illuminated) (j, 0) * polarizing_vector(0, 1) * complex_number; //no need to transpose polarizing vector
+		(*IncidentElectricField) (j, 2) = (*illuminated) (j, 0) * polarizing_vector(0, 2) * complex_number;
 	}
 	return IncidentElectricField;
 }
@@ -334,7 +337,7 @@ int main ()
 	
 	
 	
-	int start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
+	long start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
 	double  * data = parseAndBuildData ("shape.txt", start_of_node_field, start_of_triangle_field, end_of_triangle_field);
 	Matrix<double> *nodes = build_nodes (data, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
 	Matrix<double> *triangles = build_triangles (data, start_of_triangle_field, end_of_triangle_field);
@@ -343,7 +346,7 @@ int main ()
 	calculate_Centroids_and_Normals (*centroids, *normals, triangles->getLength(), *nodes, *triangles);
 	
 	Matrix<double> torch = *new Matrix <double>(1, 3); //direction vector of incident E-field
-	torch (0, 0) = 0; torch (0, 1) = 0; torch (0, 2) = 1; //completely arbitrary direction of the incident Electromagnetic field	
+	torch (0, 0) = 1; torch (0, 1) = 1; torch (0, 2) = 1; //completely arbitrary direction of the incident Electromagnetic field	
 	
 	Matrix<int> *illuminated = calculateIlluminatedTriangles (torch, *normals); //build the illuminated vector, binary representation of illuminated triangle/shadowed triangle for each triangle in the mesh
 	
@@ -353,19 +356,19 @@ int main ()
 	
 	Matrix <complex<double> >* precalc_exponentials = new Matrix <complex<double> >(normals->getLength(), 3);
 
-	generateEFieldIncident (illuminated, polarizing_vector, torch, centroids);
-	
+	Matrix <complex<double> >* EFinc = generateEFieldIncident (illuminated, polarizing_vector, torch, centroids);
+		
 /*	for (int i = nodes->getLength() - 401; i < nodes->getLength(); i++)
 		cout << "nodes" << i << ": " << (*nodes) (i, 0) << " " << (*nodes) (i, 1) << " " << (*nodes) (i, 2) << endl;
+*/	
+	//for (long i = triangles->getLength() - 31; i < triangles->getLength(); i++)
+	//	cout << "normal " << i << ": " << (*normals)(i, 0) << " " << (*normals)(i, 1) << " " << (*normals)(i, 2) << endl;
+
+	for (int i = EFinc->getLength() - 310; i < EFinc->getLength(); i++)
+		cout << "E field inc " << i << ": " << (*EFinc) (i, 0).real() << " + " << (*EFinc) (i, 0).imag() << "i " << (*EFinc) (i, 1).real() << " + " << (*EFinc) (i, 1).imag() << "i " << (*EFinc) (i, 2).real() << " + " << (*EFinc) (i, 2).imag() << "i " << endl;
 	
-	for (int i = triangles->getLength() - 31; i < triangles->getLength(); i++)
-		cout << "triangle " << i << ": " << (*triangles)(i, 0) << " " << (*triangles)(i, 1) << " " << (*triangles)(i, 2) << endl;
-*/
-	for (int i = normals->getLength() - 310; i < normals->getLength(); i++)
-		cout << "normals " << i << ": " << (*normals) (i, 0) << " " << (*normals) (i, 1) << " " << (*normals) (i, 2) << endl;
-	
-/*	for (int i = centroids->getLength() - 31; i < centroids->getLength(); i++)
-		cout << "centroid " << i << ": " << (*centroids)(i, 0) << " " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
+	/*for (int i = centroids->getLength() - 250; i < centroids->getLength(); i++)
+		cout << "centroid " << i << ": " << (*illuminated)(i, 0) << endl ; //" " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
 */
 	
 	return 0;
