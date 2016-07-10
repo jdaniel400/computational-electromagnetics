@@ -5,7 +5,7 @@
 #include <fstream>
 #include <complex>
 
-#define MAX_LINES 300000
+#define MAX_LINES 800000
 #define MAX_CHARS_PER_LINE 93
 #define PI 3.141592653589793238463 //could use confirmation
 using namespace std;
@@ -194,8 +194,10 @@ Matrix<double> * build_triangles (double * data, long start_of_triangle_field, l
 
 void getNewSubstring (char *& result, char * charArray, int start_index_inclusive, int end_index_exclusive)
 {
-	if (result != NULL)
-		delete[] result;	
+	if (result != NULL) {
+		delete[] result;
+	//	result == NULL;
+	}	
 	result = new char [end_index_exclusive - start_index_inclusive + 1]; //+ 1 for null terminating char
 	for (int x = start_index_inclusive; x < end_index_exclusive; x++)
 		result[x - start_index_inclusive] = charArray[x];
@@ -261,7 +263,7 @@ double * parseAndBuildData (const char *file_name, long & start_of_node_field, l
 	
 
 	prev = current[0]; //prev variable used in detecting start field markers, initialize to first element
-	for (long i = 0; i < MAX_LINES; i++)
+	for (long i = 0; i < idx_for_current; i++)
 	{
 		if (current[i] == 2411 && prev == -1) {
 			start_of_node_field = i + 5;
@@ -338,7 +340,7 @@ int main ()
 	
 	
 	long start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
-	double  * data = parseAndBuildData ("shape.txt", start_of_node_field, start_of_triangle_field, end_of_triangle_field);
+	double  * data = parseAndBuildData ("sphere_med.txt", start_of_node_field, start_of_triangle_field, end_of_triangle_field);
 	Matrix<double> *nodes = build_nodes (data, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
 	Matrix<double> *triangles = build_triangles (data, start_of_triangle_field, end_of_triangle_field);
 	Matrix<double> *normals = new Matrix <double>(triangles->getLength(), 3);
