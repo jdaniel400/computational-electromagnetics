@@ -1,4 +1,4 @@
-#include <Matrix.h>
+#include "physics.h"
 
 Matrix<int> * calculateIlluminatedTriangles (Matrix<double> & torch, Matrix<double> & normals)
 {

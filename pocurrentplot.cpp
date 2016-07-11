@@ -4,7 +4,6 @@
 #include <cmath>
 #include <fstream>
 #include <complex>
-
 #define MAX_LINES 800000
 #define MAX_CHARS_PER_LINE 93
 #define PI 3.141592653589793238463 //could use confirmation

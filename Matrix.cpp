@@ -1,3 +1,5 @@
+#include "Matrix.h"
+
 template <class T>
 Matrix<T>::Matrix (const long num_rows, const long num_columns)
 {

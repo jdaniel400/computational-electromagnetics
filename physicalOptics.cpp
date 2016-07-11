@@ -1,3 +1,14 @@
+#include <cstdlib>
+#include <cstdio>
+#include <iostream>
+#include <cmath>
+#include <fstream>
+#include <complex>
+#include "Matrix.h"
+#include "physics.h"
+#include "mesh.h"
+
+using namespace std;
 int main ()
 {
 	

@@ -1,10 +1,19 @@
+//Matrix.h
+
+#ifndef __MATRIX_H_INCLUDED_
+#define __MATRIX_H_INCLUDED__
+
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
 #include <cmath>
 #include <fstream>
 #include <complex>
-
+#define MAX_LINES 800000
+#define MAX_CHARS_PER_LINE 93
+#define PI 3.141592653589793238463 //could use confirmation
+using namespace std;
+template <class T>
 class Matrix
 {
 public:
@@ -25,3 +34,4 @@ public:
 	long number_of_rows;
 };
 
+#endif
