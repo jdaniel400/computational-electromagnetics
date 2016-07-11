@@ -1,7 +1,5 @@
 //Matrix.h
-
-#ifndef __MATRIX_H_INCLUDED_
-#define __MATRIX_H_INCLUDED__
+#pragma once
 
 #include <cstdlib>
 #include <cstdio>
@@ -23,9 +21,9 @@ public:
 	T& operator()(long row, long col) const;
 	long getLength();
 	void normalize();
-	void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, long num_triangles, Matrix & nodes, Matrix & triangles);
-	Matrix * build_nodes (long num_columns, long start_of_node_field, long start_of_triangle_field);
-	Matrix * build_triangles (long num_columns, long start_of_triangle_field, long end_of_triangle_field);
+//	void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, long num_triangles, Matrix & nodes, Matrix & triangles);
+//	Matrix * build_nodes (long num_columns, long start_of_node_field, long start_of_triangle_field);
+//	Matrix * build_triangles (long num_columns, long start_of_triangle_field, long end_of_triangle_field);
 
 
 
@@ -34,4 +32,3 @@ public:
 	long number_of_rows;
 };
 
-#endif
