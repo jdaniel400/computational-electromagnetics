@@ -53,3 +53,11 @@ Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Ma
 	}
 	return IncidentElectricField;
 }
+
+
+Matrix <complex<double> >* generateHFieldIncident (Matrix<double> & torch, complex<double> impedance, Matrix <complex<double> >* E_field_inc)
+{
+	Matrix <complex<double> > torch = *(new Matrix<complex<double> > (1, 3));
+	torch (0,0) /= impedance; torch (0,1) /= impedance; torch (0,2) /= impedance;
+	return &E_field_inc->cross (torch);
+}

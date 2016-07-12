@@ -31,11 +31,14 @@ int main ()
 	polarizing_vector =  *new Matrix<double> (1,3);
 	polarizing_vector (0,0) = 1; polarizing_vector (0,1) = 0; polarizing_vector (0, 2) = 0;
 	
-	Matrix <complex<double> >* precalc_exponentials = new Matrix <complex<double> >(normals->getLength(), 3);
+	//Matrix <complex<double> >* precalc_exponentials = new Matrix <complex<double> >(normals->getLength(), 3);
 
 	Matrix <complex<double> >* EFinc = generateEFieldIncident (illuminated, polarizing_vector, torch, centroids);
-		
-/*	for (int i = nodes->getLength() - 401; i < nodes->getLength(); i++)
+	
+	complex<double> impedance = 120 / PI;	
+	Matrix <complex<double> >* HFinc = generateHFieldIncident (torch, impedance, EFinc);
+	
+ /*	for (int i = nodes->getLength() - 401; i < nodes->getLength(); i++)
 		cout << "nodes" << i << ": " << (*nodes) (i, 0) << " " << (*nodes) (i, 1) << " " << (*nodes) (i, 2) << endl;
 */	
 	//for (long i = triangles->getLength() - 31; i < triangles->getLength(); i++)
