@@ -1,6 +1,6 @@
 all: po
 po: physicalOptics.o physics.o physics.hpp mesh.o mesh.hpp Matrix.o Matrix.hpp
-	g++ -g physicalOptics.o physics.o mesh.o Matrix.o
+	g++ -g physicalOptics.o physics.o mesh.o Matrix.o -o PO
 physicalOptics.o: physicalOptics.cpp Matrix.hpp physics.hpp mesh.hpp
 	g++ -g -c physicalOptics.cpp
 physics.o: physics.cpp physics.hpp

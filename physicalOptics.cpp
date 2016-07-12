@@ -7,6 +7,7 @@
 #include "Matrix.hpp"
 #include "physics.hpp"
 #include "mesh.hpp"
+#include "Matrix.cpp"
 using namespace std;
 int main ()
 {

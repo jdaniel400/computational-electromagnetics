@@ -1,5 +1,5 @@
 #include "physics.hpp"
-
+#include "Matrix.cpp"
 Matrix<int> * calculateIlluminatedTriangles (Matrix<double> & torch, Matrix<double> & normals)
 {
 	/* Takes on torch vector and normal matrix. Torch vector is assumed to be a 1 x 3 vector, incidicates direction of incident E-field
