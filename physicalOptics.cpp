@@ -4,9 +4,9 @@
 #include <cmath>
 #include <fstream>
 #include <complex>
-#include "Matrix.h"
-#include "physics.h"
-#include "mesh.h"
+#include "Matrix.hpp"
+#include "physics.hpp"
+#include "mesh.hpp"
 using namespace std;
 int main ()
 {

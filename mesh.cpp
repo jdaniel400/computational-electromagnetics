@@ -1,4 +1,4 @@
-#include "mesh.h"
+#include "mesh.hpp"
 
 
 void calculate_Centroids_and_Normals (Matrix<double> & centroids, Matrix<double> & normals, long num_triangles, Matrix<double> & nodes, Matrix<double> & triangles)

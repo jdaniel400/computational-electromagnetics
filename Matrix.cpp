@@ -1,4 +1,4 @@
-#include "Matrix.h"
+#include "Matrix.hpp"
 
 template <class T>
 Matrix<T>::Matrix (const long num_rows, const long num_columns)

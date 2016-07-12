@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <complex>
-#include "Matrix.h"
+#include "Matrix.hpp"
 #define PI 3.141592653589793238463 //could use confirmation
 using namespace std;
 
