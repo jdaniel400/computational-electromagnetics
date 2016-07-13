@@ -36,15 +36,16 @@ Matrix<T> & Matrix<T>::cross (Matrix & arg_vect)
 	assumes that template type supports * operator */
 	Matrix<T> *result = new Matrix<T> (getLength(), 3);
 	//This is the formula for cross product, implemented iteratively for each row of the matrices
-	
+	//Cross product for single vector argument (1 x 3)	
 	if (arg_vect.getLength() == 1) {
 		for (long i = 0; i < getLength(); i++) {
 			(*result)(i,0) = matrix[1][i] * arg_vect(0,2) - matrix[2][i] * arg_vect(0,1); //note that matrix[][] convention is the opposite of (*matrix) (,) convetion
 			(*result)(i,1) = matrix[2][i] * arg_vect(0,0) - matrix[0][i] * arg_vect(0,2); //it seemed  more natural to create the matrices in this way
 			(*result)(i,2) = matrix[0][i] * arg_vect(0,1) - matrix[1][i] * arg_vect(0,0); //and the to flip in the (,) overload
 		}
+		return *result;
 	}
-	
+	//Cross product for matrix of vectors argument (n x 3)
 	for (long i = 0; i < getLength(); i++)
 	{
 		(*result)(i,0) = matrix[1][i] * arg_vect(i,2) - matrix[2][i] * arg_vect(i,1); //note that matrix[][] convention is the opposite of (*matrix) (,) convetion

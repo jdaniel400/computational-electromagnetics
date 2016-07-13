@@ -57,7 +57,16 @@ Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Ma
 
 Matrix <complex<double> >* generateHFieldIncident (Matrix<double> & torch, complex<double> impedance, Matrix <complex<double> >* E_field_inc)
 {
-	Matrix <complex<double> > torch = *(new Matrix<complex<double> > (1, 3));
-	torch (0,0) /= impedance; torch (0,1) /= impedance; torch (0,2) /= impedance;
-	return &E_field_inc->cross (torch);
+	Matrix <complex<double> > scaled_torch = *(new Matrix<complex<double> > (1, 3)); //copy constructor??? memory leak???
+	scaled_torch (0,0) = torch (0,0) / impedance; scaled_torch (0,1) = torch (0,1) / impedance; scaled_torch (0,2) = torch (0,2) / impedance;
+	Matrix<complex<double> > * H_field = &E_field_inc->cross (scaled_torch);
+	return H_field;
+}
+
+Matrix <complex<double> >* calcSurfaceCurrents_PHYSICAL_OPTICS_ (Matrix<double> * normals, Matrix<complex<double> > * H_field_inc)
+{
+	Matrix <complex<double> > * unscaledPOCurrent = H_field_inc->cross (normals);
+	(*unscaledPOCurrent) *= 2; //scale by factor of 2
+		/*TODO: Overload the matrix * constant operator 
+	return unscaledPOCurrent;
 }
