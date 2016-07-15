@@ -24,6 +24,16 @@ T& Matrix<T>::operator()(long row, long col) const
 }
 
 template <class T>
+T& Matrix<T>::operator*=(int c)
+{
+	for (int i = 0; i < getLength(); i++) {
+		matrix[i][0] *= c; 
+		matrix[i][1] *= c; 
+		matrix[i][2] *= c; 
+	}
+}
+
+template <class T>
 long Matrix<T>::getLength()
 {
 	return number_of_rows;

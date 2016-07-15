@@ -19,6 +19,7 @@ public:
 	Matrix & cross (Matrix & arg_vect);
 	T dot (Matrix<double> & arg_vect);
 	T& operator()(long row, long col) const;
+	T& operator*=(int c);
 	long getLength();
 	void normalize();
 //	void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, long num_triangles, Matrix & nodes, Matrix & triangles);
