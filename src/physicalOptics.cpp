@@ -15,7 +15,7 @@ int main ()
 	
 	
 	long start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
-	double  * data = parseAndBuildData ("sphere_veryhigh.txt", start_of_node_field, start_of_triangle_field, end_of_triangle_field);
+	double  * data = parseAndBuildData ("mesh/sphere_veryhigh.txt", start_of_node_field, start_of_triangle_field, end_of_triangle_field);
 	Matrix<double> *nodes = build_nodes (data, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
 	Matrix<double> *triangles = build_triangles (data, start_of_triangle_field, end_of_triangle_field);
 	Matrix<double> *normals = new Matrix <double>(triangles->getLength(), 3);
