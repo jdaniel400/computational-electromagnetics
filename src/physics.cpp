@@ -63,7 +63,7 @@ Matrix <complex<double> >* generateHFieldIncident (Matrix<double> & torch, compl
 	return H_field;
 }
 
-Matrix <complex<double> >* calcSurfaceCurrents_PHYSICAL_OPTICS_ (Matrix<double> * normals, Matrix<complex<double> > * H_field_inc)
+Matrix <complex<double> >* calcSurfaceCurrents_PHYSICAL_OPTICS (Matrix<double> * normals, Matrix<complex<double> > * H_field_inc)
 {
 
 	Matrix<complex<double> > complex_normals = *new Matrix<complex<double> > (normals->getLength(), 3);
@@ -73,6 +73,5 @@ Matrix <complex<double> >* calcSurfaceCurrents_PHYSICAL_OPTICS_ (Matrix<double> 
 	
 	Matrix <complex<double> > * unscaledPOCurrent = &H_field_inc->cross (complex_normals);
 	(*unscaledPOCurrent) *= 2; //scale by factor of 2
-		/*TODO: Overload the matrix * constant operator 
-	return unscaledPOCurrent; */
+	return unscaledPOCurrent; 
 }

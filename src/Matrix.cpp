@@ -24,12 +24,12 @@ T& Matrix<T>::operator()(long row, long col) const
 }
 
 template <class T>
-T& Matrix<T>::operator*=(int c)
+T& Matrix<T>::operator*=(double c)
 {
 	for (int i = 0; i < getLength(); i++) {
-		matrix[i][0] *= c; 
-		matrix[i][1] *= c; 
-		matrix[i][2] *= c; 
+		matrix[0][i] = matrix[0][i] * c; 
+		matrix[1][i] = matrix[1][i] * c; 
+		matrix[2][i] = matrix[2][i] * c; 
 	}
 }
 
