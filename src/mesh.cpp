@@ -1,8 +1,19 @@
 #include "mesh.hpp"
 #include "Matrix.cpp"
 
-void calculate_Centroids_and_Normals (Matrix<double> & centroids, Matrix<double> & normals, long num_triangles, Matrix<double> & nodes, Matrix<double> & triangles)
+Mesh::Mesh ()
 {
+	data = parseAndBuildData ("mesh/sphere_veryhigh.txt");
+	
+	nodes = build_nodes (); //yes, start_of_triangle_field is right here
+	triangles = build_triangles ();
+	normals = new Matrix <double>(triangles->getLength(), 3);
+	centroids = new Matrix <double>(triangles->getLength(), 3);
+	calculate_Centroids_and_Normals ();
+}
+void Mesh::calculate_Centroids_and_Normals ()
+{
+	long num_triangles = triangles->getLength();
 	Matrix<double> pts_A = *new Matrix<double> (num_triangles, 3); //RESOLVE: Possible memory leaks?????? Derefencing new object, calling copy constructor, then moving on?
 	Matrix<double> pts_B = *new Matrix<double> (num_triangles, 3);
 	Matrix<double> pts_C = *new Matrix<double> (num_triangles, 3);
@@ -10,36 +21,36 @@ void calculate_Centroids_and_Normals (Matrix<double> & centroids, Matrix<double>
 	Matrix<double> vect2 = *new Matrix<double> (num_triangles, 3);
 
 	for (long i = 0; i < num_triangles; i++) {
-		long nodeA = triangles(i,0); //triangles will always contain integers (in floating point format)
-   		long nodeB = triangles(i,1);
-    		long nodeC = triangles(i,2);
+		long nodeA = (*triangles)(i,0); //triangles will always contain integers (in floating point format)
+   		long nodeB = (*triangles)(i,1);
+    		long nodeC = (*triangles)(i,2);
   	  	for (int j = 0; j < 3; j++)
-    			pts_A (i, j) = nodes (nodeA, j); 
+    			pts_A (i, j) = (*nodes) (nodeA, j); 
  	   	for (int j = 0; j < 3; j++)
-    			pts_B (i, j) = nodes (nodeB, j);
+    			pts_B (i, j) = (*nodes) (nodeB, j);
     		for (int j = 0; j < 3; j++)
-    			pts_C (i, j) = nodes (nodeC, j);
+    			pts_C (i, j) = (*nodes) (nodeC, j);
 		for (int j = 0; j < 3; j++)
-    			vect1(i, j) = nodes(nodeA, j) - nodes(nodeB, j);
+    			vect1(i, j) = (*nodes) (nodeA, j) - (*nodes)(nodeB, j);
 	  	for (int j = 0; j < 3; j++)
-    			vect2(i, j) = nodes(nodeA, j) - nodes(nodeC, j);
+    			vect2(i, j) = (*nodes) (nodeA, j) - (*nodes)(nodeC, j);
 
 		//cout << "pts_A " << i << " " << pts_A (i, 0) << " " << pts_A (i, 1) << " " << pts_A (i, 2) << endl;
 		//cout << "pts_B " << pts_B (i, 0) << " "<< pts_B (i, 1) << " " << pts_B (i, 2) << endl;
 		//cout << "pts_C " << pts_C (i, 0) << " "<< pts_C (i, 1) << " " << pts_C (i, 2) << endl;
 		
-		centroids (i, 0) = (pts_A(i, 0) + pts_B(i, 0) + pts_C(i, 0)) / 3;
-		centroids (i, 1) = (pts_A(i, 1) + pts_B(i, 1) + pts_C(i, 1)) / 3;
-		centroids (i, 2) = (pts_A(i, 2) + pts_B(i, 2) + pts_C(i, 2)) / 3;
+		(*centroids) (i, 0) = (pts_A(i, 0) + pts_B(i, 0) + pts_C(i, 0)) / 3;
+		(*centroids) (i, 1) = (pts_A(i, 1) + pts_B(i, 1) + pts_C(i, 1)) / 3;
+		(*centroids) (i, 2) = (pts_A(i, 2) + pts_B(i, 2) + pts_C(i, 2)) / 3;
 	
 	}
 
-	normals = vect1.cross(vect2);
-	normals.normalize();
+	normals = &(vect1.cross(vect2));
+	normals->normalize();
 
 }
 
-Matrix<double> * build_nodes (double * data, long start_of_node_field, long start_of_triangle_field)
+Matrix<double> * Mesh::build_nodes ()
 
 {
 	long prealloc_length = ((start_of_triangle_field - 3 - start_of_node_field) / 7) + 1; // added + 1 because originally MATLAB called for ceil
@@ -64,7 +75,7 @@ Matrix<double> * build_nodes (double * data, long start_of_node_field, long star
 }
 
 
-Matrix<double> * build_triangles (double * data, long start_of_triangle_field, long end_of_triangle_field)
+Matrix<double> * Mesh::build_triangles ()
 {
 	//NOTE: Start of the triangle field has been designated as the first node number (with the code + 1) as of 6-29-16
 	long prealloc_length = (end_of_triangle_field  - (start_of_triangle_field + 6))/9 + 1;
@@ -89,7 +100,7 @@ Matrix<double> * build_triangles (double * data, long start_of_triangle_field, l
 	return tmp;
 }
 
-void getNewSubstring (char *& result, char * charArray, int start_index_inclusive, int end_index_exclusive)
+void Mesh::getNewSubstring (char *& result, char * charArray, int start_index_inclusive, int end_index_exclusive)
 {
 	if (result != NULL) {
 		delete[] result;
@@ -101,7 +112,8 @@ void getNewSubstring (char *& result, char * charArray, int start_index_inclusiv
 	result[end_index_exclusive - start_index_inclusive] = '\0'; 
 }
 
-double * parseAndBuildData (const char *file_name, long & start_of_node_field, long & start_of_triangle_field, long & end_of_triangle_field) {
+double * Mesh::parseAndBuildData (const char *file_name)
+{
 	ifstream mesh;
 	mesh.open(file_name);
 	long line_count = 0; //self explanatory, used in parsing file

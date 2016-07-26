@@ -5,27 +5,20 @@
 #include <fstream>
 #include <complex>
 #include "Matrix.hpp"
-#include "physics.hpp"
 #include "mesh.hpp"
+#include "physics.hpp"
 #include "Matrix.cpp"
 using namespace std;
 int main ()
 {
 	
+
 	
-	
-	long start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
-	double  * data = parseAndBuildData ("mesh/sphere_veryhigh.txt", start_of_node_field, start_of_triangle_field, end_of_triangle_field);
-	Matrix<double> *nodes = build_nodes (data, start_of_node_field, start_of_triangle_field); //yes, start_of_triangle_field is right here
-	Matrix<double> *triangles = build_triangles (data, start_of_triangle_field, end_of_triangle_field);
-	Matrix<double> *normals = new Matrix <double>(triangles->getLength(), 3);
-	Matrix<double> *centroids = new Matrix <double>(triangles->getLength(), 3);
-	calculate_Centroids_and_Normals (*centroids, *normals, triangles->getLength(), *nodes, *triangles);
-	
+	Mesh *mesh = new Mesh (); //create the mesh, constructor will parse file and build
 	Matrix<double> torch = *new Matrix <double>(1, 3); //direction vector of incident E-field
 	torch (0, 0) = 2; torch (0, 1) = 5; torch (0, 2) = 1; //completely arbitrary direction of the incident Electromagnetic field	
 	
-	Matrix<int> *illuminated = calculateIlluminatedTriangles (torch, *normals); //build the illuminated vector, binary representation of illuminated triangle/shadowed triangle for each triangle in the mesh
+	Matrix<int> *illuminated = calculateIlluminatedTriangles (torch, *(mesh->normals)); //build the illuminated vector, binary representation of illuminated triangle/shadowed triangle for each triangle in the mesh
 	
 	Matrix<double> polarizing_vector = *new Matrix<double> (1, 3);
 	polarizing_vector =  *new Matrix<double> (1,3);
@@ -33,12 +26,12 @@ int main ()
 	
 	//Matrix <complex<double> >* precalc_exponentials = new Matrix <complex<double> >(normals->getLength(), 3);
 
-	Matrix <complex<double> >* EFinc = generateEFieldIncident (illuminated, polarizing_vector, torch, centroids);
+	Matrix <complex<double> >* EFinc = generateEFieldIncident (illuminated, polarizing_vector, torch, mesh->centroids);
 	
 	complex<double> impedance = 120 / PI;	
 	Matrix <complex<double> >* HFinc = generateHFieldIncident (torch, impedance, EFinc);
 	
-	Matrix <complex<double> >* JPO = calcSurfaceCurrents_PHYSICAL_OPTICS (normals, HFinc);
+	Matrix <complex<double> >* JPO = calcSurfaceCurrents_PHYSICAL_OPTICS (mesh->normals, HFinc);
 
 	Matrix <double> * MagJPO = calcMagJPO (JPO);
 

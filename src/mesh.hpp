@@ -13,13 +13,30 @@
 using namespace std;
 
 
-void calculate_Centroids_and_Normals (Matrix<double> & centroids, Matrix<double> & normals, long num_triangles, Matrix<double> & nodes, Matrix<double> & triangles);
 
-Matrix<double> * build_nodes (double * data, long start_of_node_field, long start_of_triangle_field);
+class Mesh
+{
+private:
+		
+	long start_of_node_field, start_of_triangle_field, end_of_triangle_field; //markers filled in as part of the parsing process
+	double * data; //array to hold parsed file data
+	void getNewSubstring (char *& result, char * charArray, int start_index_inclusive, int end_index_exclusive);
+	Matrix <double> *nodes;
+	Matrix <double> *triangles;
+public:
+	Mesh ();
+	
+	Matrix <double> *centroids;
+	Matrix <double> *normals;
 
-Matrix<double> * build_triangles (double * data, long start_of_triangle_field, long end_of_triangle_field);
+	void calculate_Centroids_and_Normals ();
 
-void getNewSubstring (char *& result, char * charArray, int start_index_inclusive, int end_index_exclusive);
+	Matrix<double> * build_nodes ();
 
-double * parseAndBuildData (const char *file_name, long & start_of_node_field, long & start_of_triangle_field, long & end_of_triangle_field);
+	Matrix<double> * build_triangles ();
+
+	double * parseAndBuildData (const char *file_name);
+
+};
+
 #endif
