@@ -16,7 +16,7 @@ using namespace std;
 
 Matrix<int> * calculateIlluminatedTriangles (Matrix<double> & torch, Matrix<double> & normals);
 
-Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Matrix<double> & polarizing_vector, Matrix<double> & torch, Matrix<double> * centroids);
+Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Matrix<double> & polarizing_vector, Matrix<double> & torch, Matrix<double> * centroids, int lambda);
 
 Matrix <complex<double> >* generateHFieldIncident (Matrix<double> & torch, complex<double> impedance, Matrix <complex<double> >* E_field_inc);
 

@@ -26,7 +26,7 @@ Matrix<int> * calculateIlluminatedTriangles (Matrix<double> & torch, Matrix<doub
 	return  illuminated;
 }
 
-Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Matrix<double> & polarizing_vector, Matrix<double> & torch, Matrix<double> * centroids)
+Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Matrix<double> & polarizing_vector, Matrix<double> & torch, Matrix<double> * centroids, int lambda)
 {
 	//Q: The result of this function is one dimensional. Is this correct? 
 	/* This function will generate an incident E field according to Electromagnetic wave equations
@@ -36,8 +36,8 @@ Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Ma
 	centroids : matrix containing x y z coordinates of the centroids of the triangles in the mesh
 	INSERT LAMBDA CONSTRAINTS HERE 
 	*/
-
-	int lambda = 138; //need to verify that this is, in fact, lambda. what
+	
+	//USE 138 FOR LAMBDA //need to verify that this is, in fact, lambda
 	Matrix<complex<double> > * IncidentElectricField = new Matrix<complex<double> > (centroids->getLength(), 3); //incident E field
 	for (long j  = 0; j < centroids->getLength(); j++) { 
 		std::complex<double> complex_number (0,0); //complex number placeholder

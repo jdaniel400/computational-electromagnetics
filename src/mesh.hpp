@@ -36,7 +36,8 @@ public:
 	Matrix<double> * build_triangles ();
 
 	double * parseAndBuildData (const char *file_name);
-
+	
+	void importEMF (const char *file_name, Matrix<double> &direction_of_propagation, Matrix<double> &polarizing_vector, complex<double> &impedance, int &lambda);
 };
 
 #endif

@@ -112,6 +112,27 @@ void Mesh::getNewSubstring (char *& result, char * charArray, int start_index_in
 	result[end_index_exclusive - start_index_inclusive] = '\0'; 
 }
 
+void Mesh::importEMF (const char *file_name, Matrix<double> &direction_of_propagation, Matrix<double> &polarizing_vector, complex<double> &impedance, int &lambda)
+{
+	//reads and imports data from file to construct incident electric field
+	//File stored in format
+	//	X_PROP_DIRECTION Y_PROP_DIRECTION Z_PROP_DIRECTION
+	//	X_THETA Y_THETA Z_THETA
+	//	IMPEDANCE
+	//	LAMBDA	
+
+	ifstream emf;
+	emf.open(file_name);
+	emf >> direction_of_propagation (0, 0);
+	emf >> direction_of_propagation (0, 1);
+	emf >> direction_of_propagation (0, 2);
+	emf >> polarizing_vector (0,0);
+	emf >> polarizing_vector (0,1);
+	emf >> polarizing_vector (0,2);
+	emf >> impedance;
+	emf >> lambda;
+	emf.close();
+}
 double * Mesh::parseAndBuildData (const char *file_name)
 {
 	ifstream mesh;

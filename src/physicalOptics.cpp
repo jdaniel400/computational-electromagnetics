@@ -16,19 +16,21 @@ int main ()
 	
 	Mesh *mesh = new Mesh (); //create the mesh, constructor will parse file and build
 	Matrix<double> torch = *new Matrix <double>(1, 3); //direction vector of incident E-field
-	torch (0, 0) = 2; torch (0, 1) = 5; torch (0, 2) = 1; //completely arbitrary direction of the incident Electromagnetic field	
+	//torch (0, 0) = 2; torch (0, 1) = 5; torch (0, 2) = 1; //completely arbitrary direction of the incident Electromagnetic field	
 	
 	Matrix<int> *illuminated = calculateIlluminatedTriangles (torch, *(mesh->normals)); //build the illuminated vector, binary representation of illuminated triangle/shadowed triangle for each triangle in the mesh
 	
 	Matrix<double> polarizing_vector = *new Matrix<double> (1, 3);
 	polarizing_vector =  *new Matrix<double> (1,3);
-	polarizing_vector (0,0) = 1; polarizing_vector (0,1) = 0; polarizing_vector (0, 2) = 0;
+	//polarizing_vector (0,0) = 1; polarizing_vector (0,1) = 0; polarizing_vector (0, 2) = 0;
 	
 	//Matrix <complex<double> >* precalc_exponentials = new Matrix <complex<double> >(normals->getLength(), 3);
 
-	Matrix <complex<double> >* EFinc = generateEFieldIncident (illuminated, polarizing_vector, torch, mesh->centroids);
+	int lambda; //frequency of the inc EMF 
+	Matrix <complex<double> >* EFinc = generateEFieldIncident (illuminated, polarizing_vector, torch, mesh->centroids, lambda);
 	
-	complex<double> impedance = 120 / PI;	
+	complex<double> impedance;// = 120 / PI;
+	mesh->importEMF ("IncidentEField.txt", torch, polarizing_vector, impedance, lambda);	
 	Matrix <complex<double> >* HFinc = generateHFieldIncident (torch, impedance, EFinc);
 	
 	Matrix <complex<double> >* JPO = calcSurfaceCurrents_PHYSICAL_OPTICS (mesh->normals, HFinc);
