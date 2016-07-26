@@ -22,6 +22,7 @@ public:
 	T& operator*=(double c);
 	long getLength();
 	void normalize();
+	void print ();
 //	void calculate_Centroids_and_Normals (Matrix & centroids, Matrix & normals, long num_triangles, Matrix & nodes, Matrix & triangles);
 //	Matrix * build_nodes (long num_columns, long start_of_node_field, long start_of_triangle_field);
 //	Matrix * build_triangles (long num_columns, long start_of_triangle_field, long end_of_triangle_field);

@@ -41,7 +41,7 @@ long Matrix<T>::getLength()
 
 template <class T>
 Matrix<T> & Matrix<T>::cross (Matrix & arg_vect)
-{
+{https://github.com/jdaniel400/computational-electromagnetics.git
 	/*Cross product implementation, iteratively for each row of the matrices
 	assumes that template type supports * operator */
 	Matrix<T> *result = new Matrix<T> (getLength(), 3);
@@ -71,7 +71,7 @@ T Matrix<T>::dot (Matrix<double> & arg_vect)
 {	
 	/*Function takes on a Matrix assumed to be a 1 x 3 vector. arg_vect must be 1 x 3, no other size will be acceptable.
  * 	Update: This function assumes that this Matrix is a 1 x 3 vector.
- * 	Returns result as a double floating point*/
+ https://github.com/jdaniel400/computational-electromagnetics.git* 	Returns result as a double floating point*/
 	return matrix[0][0] * arg_vect (0, 0) + matrix[1][0] * arg_vect (0, 1) + matrix[2][0] * arg_vect (0, 2);		
 }
 template <class T>
@@ -86,4 +86,14 @@ void Matrix<T>::normalize ()
 		matrix[2][i] = matrix[2][i] / length;
 	}
 
+}
+
+template <class T>
+void Matrix<T>::print()
+{
+	ofstream output;
+	output.open ("matrix_output.txt");
+	for (long i = 0; i < getLength(); i++)
+		output << std::scientific << matrix[0][i] << " " <<matrix[1][i] << " " << matrix[2][i] << endl;	
+	output.close();
 }

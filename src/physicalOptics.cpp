@@ -39,7 +39,6 @@ int main ()
 	Matrix <complex<double> >* HFinc = generateHFieldIncident (torch, impedance, EFinc);
 	
 	Matrix <complex<double> >* JPO = calcSurfaceCurrents_PHYSICAL_OPTICS (normals, HFinc);
-		
  /*	for (int i = nodes->getLength() - 401; i < nodes->getLength(); i++)
 		cout << "nodes" << i << ": " << (*nodes) (i, 0) << " " << (*nodes) (i, 1) << " " << (*nodes) (i, 2) << endl;
 */	
@@ -48,7 +47,7 @@ int main ()
 
 	for (int i = EFinc->getLength() - 310; i < EFinc->getLength(); i++)
 		cout << "E field inc " << i << ": " << (*JPO) (i, 0).real() << " + " << (*EFinc) (i, 0).imag() << "i " << (*EFinc) (i, 1).real() << " + " << (*EFinc) (i, 1).imag() << "i " << (*EFinc) (i, 2).real() << " + " << (*EFinc) (i, 2).imag() << "i " << endl;
-	
+	JPO->print();	
 	/*for (int i = centroids->getLength() - 250; i < centroids->getLength(); i++)
 		cout << "centroid " << i << ": " << (*illuminated)(i, 0) << endl ; //" " << (*centroids)(i, 1) << " " << (*centroids)(i, 2) << endl;
 */
