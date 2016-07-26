@@ -67,11 +67,21 @@ Matrix <complex<double> >* calcSurfaceCurrents_PHYSICAL_OPTICS (Matrix<double> *
 {
 
 	Matrix<complex<double> > complex_normals = *new Matrix<complex<double> > (normals->getLength(), 3);
-	for (int i = 0; i < normals->getLength(); i++) {
+	for (long i = 0; i < normals->getLength(); i++) {
 		complex_normals (i, 0) = (*normals) (i, 0); complex_normals (i, 1) = (*normals) (i, 1); complex_normals (i, 2) = (*normals) (i, 2);	
 	}
 	
 	Matrix <complex<double> > * unscaledPOCurrent = &H_field_inc->cross (complex_normals);
 	(*unscaledPOCurrent) *= 2; //scale by factor of 2
 	return unscaledPOCurrent; 
+}
+
+Matrix <double> *calcMagJPO (Matrix<complex<double> > *Jpo)
+{
+	long l = Jpo->getLength();
+	Matrix<double> *magJPO = new Matrix<double> (l, 1);
+	for (long i = 0; i < l; i++) {
+		(*magJPO) (i, 0) = sqrt((*Jpo)(i, 0).real() * (*Jpo)(i, 0).real() + (*Jpo)(i, 1).real() * (*Jpo)(i, 1).real() + (*Jpo)(i, 2).real() * (*Jpo)(i, 2).real());
+	}
+	return magJPO;
 }

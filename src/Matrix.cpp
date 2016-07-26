@@ -71,7 +71,7 @@ T Matrix<T>::dot (Matrix<double> & arg_vect)
 {	
 	/*Function takes on a Matrix assumed to be a 1 x 3 vector. arg_vect must be 1 x 3, no other size will be acceptable.
  * 	Update: This function assumes that this Matrix is a 1 x 3 vector.
- https://github.com/jdaniel400/computational-electromagnetics.git* 	Returns result as a double floating point*/
+  	Returns result as a double floating point*/
 	return matrix[0][0] * arg_vect (0, 0) + matrix[1][0] * arg_vect (0, 1) + matrix[2][0] * arg_vect (0, 2);		
 }
 template <class T>
@@ -91,9 +91,11 @@ void Matrix<T>::normalize ()
 template <class T>
 void Matrix<T>::print()
 {
+	//Print the contents of the matrix in row major order to a file named matrix_output.txt
+	//Currently only supports VECTORS (N X 1)
 	ofstream output;
 	output.open ("matrix_output.txt");
 	for (long i = 0; i < getLength(); i++)
-		output << std::scientific << matrix[0][i] << " " <<matrix[1][i] << " " << matrix[2][i] << endl;	
+		output << std::scientific << matrix[0][i] << endl; 
 	output.close();
 }

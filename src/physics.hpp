@@ -21,4 +21,6 @@ Matrix<complex<double> > * generateEFieldIncident (Matrix<int> * illuminated, Ma
 Matrix <complex<double> >* generateHFieldIncident (Matrix<double> & torch, complex<double> impedance, Matrix <complex<double> >* E_field_inc);
 
 Matrix <complex<double> >* calcSurfaceCurrents_PHYSICAL_OPTICS (Matrix<double> * normals, Matrix<complex<double> > * H_field_inc);
+
+Matrix <double> *calcMagJPO (Matrix<complex<double> > *Jpo);
 #endif
